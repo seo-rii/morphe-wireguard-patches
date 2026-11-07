@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "patches": [
     {
       "name": "AI channel filter",
@@ -13772,7 +13772,7 @@
     {
       "name": "WireGuard proxy (experimental)",
       "description": "Imports a WireGuard configuration and routes supported app requests through an authenticated app-local proxy, without Android VPN permission. Targets the YouTube Music versions listed in this bundle and requires a 64-bit APK. Root mounting is not supported. This is an unofficial, unverified-on-device prototype, not a system-wide VPN or kill switch.",
-      "default": false,
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {
@@ -13837,7 +13837,7 @@
     {
       "name": "WireGuard proxy (experimental)",
       "description": "Imports a WireGuard configuration and routes supported app requests through an authenticated app-local proxy, without Android VPN permission. Requires a 64-bit YouTube 20.47.62 or newer APK. Root mounting is not supported. This is an unofficial, unverified-on-device prototype, not a system-wide VPN or kill switch.",
-      "default": false,
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {

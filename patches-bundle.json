@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-07T02:31:00",
-  "description": "Unofficial experimental app-local WireGuard proxy patches for YouTube and YouTube Music, based on Morphe Patches v2.1.0. Host compilation and 13 tests passed; APK application, playback, real VPN handshakes and leak testing remain unverified. Pre-release only; not a system-wide VPN.",
-  "download_url": "https://github.com/seo-rii/morphe-wireguard-patches/releases/download/v2.1.0/morphe-wireguard-youtube-music-preview-2.1.0.mpp",
+  "created_at": "2026-11-07T04:16:55Z",
+  "description": "Unofficial experimental app-local WireGuard proxy patches for YouTube and YouTube Music. WireGuard patches selected by default; tunneling stays off until profile import and explicit in-app enablement. Built from v2.1.0; v2.1.1 uses a verified two-byte class-file default flag update, without a full Gradle recompile or on-device testing. Standard release; experimental functionality, not a system VPN.",
+  "download_url": "https://github.com/seo-rii/morphe-wireguard-patches/releases/download/v2.1.1/morphe-wireguard-youtube-music-preview-2.1.1.mpp",
   "signature_download_url": "",
-  "version": "2.1.0"
+  "version": "2.1.1"
 }

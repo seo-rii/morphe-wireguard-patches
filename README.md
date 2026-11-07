@@ -12,8 +12,9 @@ on Android, or navigate to **Morphe → Sources → + → Remote** and enter:
 `https://github.com/seo-rii/morphe-wireguard-patches`
 
 This is a **standard GitHub release** (not a pre-release). The WireGuard
-implementation is nevertheless experimental and not yet validated on a real
-device. **WireGuard proxy (experimental) is selected by default** for both
+implementation is experimental, but **the maintainer has confirmed that v2.1.1
+works well on a real Android device** (2026-11-07).
+**WireGuard proxy (experimental) is selected by default** for both
 YouTube and YouTube Music; Expert mode is not required to select it.
 **Traffic tunneling remains disabled** until a valid WireGuard `.conf` is
 imported and the in-app enable switch is explicitly turned on. Each app
@@ -23,6 +24,17 @@ not supported.
 
 **The bundle includes the upstream patches**, so choose **one** patch source
 per app instead of combining this source with official Morphe patches.
+
+## Real-device verification status
+
+**Works on-device — maintainer-confirmed (2026-11-07).** The maintainer reports
+successful practical use of the released v2.1.1 build on a physical Android
+device. This is a first-hand functional verification for the tested setup, not
+a published, independently reproducible acceptance-test report. Exact APK
+versions, app-by-app test logs, handshake diagnostics, and DNS/traffic leak
+measurements have not yet been documented.
+
+The supported feature scope and limitations below still apply.
 
 ## Important limitations
 
@@ -35,8 +47,10 @@ per app instead of combining this source with official Morphe patches.
   loader (202 patches), DEX, JNI and native-payload checks. The v2.1.1
   default-selection update uses exact one-byte class-file changes for each
   app, checked with JVM bytecode inspection and ZIP integrity checks.
-  **It was not fully recompiled or retested through Gradle.** Actual target
-  APK patching, playback, WireGuard handshakes, and leak tests remain unverified.
+  **It was not fully recompiled or retested through Gradle.** The maintainer
+  has since reported successful real-device operation of v2.1.1; a documented
+  cross-device/version test matrix, handshake diagnostics, and DNS/network leak
+  tests remain outstanding.
 - The published bundle is unsigned. Treat it as an experimental preview, not a
   verified VPN product. No live VPN accounts or private profiles are included.
 

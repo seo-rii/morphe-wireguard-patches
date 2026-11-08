@@ -1,7 +1,7 @@
 # Unofficial app-local WireGuard patches for Morphe
 
 **Independent, experimental build. Not affiliated with MorpheApp or Proton.**
-Based on Morphe Patches v2.1.0, the v2.1.1 preview provides app-local
+Based on Morphe Patches v2.1.0, the v2.1.2 release provides app-local
 WireGuard proxy patches for YouTube and YouTube Music.
 
 ## Add this source in Morphe
@@ -14,8 +14,11 @@ on Android, or navigate to **Morphe → Sources → + → Remote** and enter:
 This is a **standard GitHub release** (not a pre-release). The WireGuard
 implementation is experimental, but **the maintainer has confirmed that v2.1.1
 works well on a real Android device** (2026-11-07).
-**WireGuard proxy (experimental) is selected by default** for both
-YouTube and YouTube Music; Expert mode is not required to select it.
+**WireGuard proxy (experimental) is selected by default** for both YouTube
+and YouTube Music in **v2.1.2**; Expert mode is not required to select it.
+This corrects v2.1.1, whose Android DEX still had the default disabled even
+though its JVM classes and patch list said default-selected.
+See the [cause, verification and update instructions](docs/wireguard-default-verification.md).
 **Traffic tunneling remains disabled** until a valid WireGuard `.conf` is
 imported and the in-app enable switch is explicitly turned on. Each app
 keeps its own encrypted profile.
@@ -45,9 +48,10 @@ The supported feature scope and limitations below still apply.
   network paths, Cast, and separate processes are not guaranteed to be covered.
 - The **v2.1.0 base** passed host compilation, **13 tests**, real Morphe
   loader (202 patches), DEX, JNI and native-payload checks. The v2.1.1
-  default-selection update uses exact one-byte class-file changes for each
-  app, checked with JVM bytecode inspection and ZIP integrity checks.
-  **It was not fully recompiled or retested through Gradle.** The maintainer
+  default-selection update changed only JVM classes and left Android DEX
+  defaults disabled. v2.1.2 corrects two DEX Boolean
+  literals and their header hashes, with SDK disassembly, JVM and archive
+  checks. **These updates were not fully rebuilt through Gradle.** The maintainer
   has since reported successful real-device operation of v2.1.1; a documented
   cross-device/version test matrix, handshake diagnostics, and DNS/network leak
   tests remain outstanding.
@@ -56,10 +60,10 @@ The supported feature scope and limitations below still apply.
 
 ## Source and release files
 
-In the [v2.1.1 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.1):
+In the [v2.1.2 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.2):
 
-- `morphe-wireguard-youtube-music-preview-2.1.1.mpp` — patch bundle,
-  SHA-256 `9905a6a9a57d281532c94a9b53215a5414ccc4185b880031c0f67d0361fd69ca`.
+- `morphe-wireguard-youtube-music-preview-2.1.2.mpp` — patch bundle,
+  SHA-256 `179132ea77ee7ce8f5afc3c595f0aff2edf9ff19362ba4d40e3396c4cbe0864f`.
 - `morphe-wireguard-prototype-source.zip` — **full corresponding source**,
   including the modified Morphe project, vendored WireGuard/gVisor code,
   built native payloads, and four pinned public build-source dependencies.
@@ -68,7 +72,8 @@ In the [v2.1.1 release](https://github.com/seo-rii/morphe-wireguard-patches/rele
 
 The source ZIP includes `README-WIREGUARD.md`, build instructions,
 unit tests, exact dependency revisions, the Music validation report, and
-the bytecode-default update script used to produce v2.1.1 from v2.1.0.
+the corrected [updater and verifier](scripts/set-wireguard-defaults.py), which
+checks both JVM and Android defaults and produces v2.1.2 from the released v2.1.1.
 See [release SHA-256 checksums](RELEASE-SHA256SUMS.txt).
 
 ## License and provenance

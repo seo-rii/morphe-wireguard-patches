@@ -1,2 +1,2 @@
-9905a6a9a57d281532c94a9b53215a5414ccc4185b880031c0f67d0361fd69ca  morphe-wireguard-youtube-music-preview-2.1.1.mpp
-c7095259401f3752e685712f21ef7b14c25e08cc35ea323fac3e08b8de014437  morphe-wireguard-prototype-source.zip
+179132ea77ee7ce8f5afc3c595f0aff2edf9ff19362ba4d40e3396c4cbe0864f  morphe-wireguard-youtube-music-preview-2.1.2.mpp
+9a5ec9cef3ee1872b4ef1904d805efc3cafb47144ae3ea583630d32284978a30  morphe-wireguard-prototype-source.zip

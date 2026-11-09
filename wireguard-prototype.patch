@@ -12,10 +12,10 @@ index 058cb3b9b..34343181c 100644
  # Local configuration file (sdk path, etc.)
 diff --git a/README-WIREGUARD.md b/README-WIREGUARD.md
 new file mode 100644
-index 000000000..d95d4f240
+index 000000000..834c0fe7e
 --- /dev/null
 +++ b/README-WIREGUARD.md
-@@ -0,0 +1,120 @@
+@@ -0,0 +1,127 @@
 +# App-local WireGuard preview — 비공식 Morphe 수정본
 +
 +Morphe Patches v2.1.0에 YouTube와 YouTube Music용 앱 내부 WireGuard 프록시를
@@ -25,10 +25,17 @@ index 000000000..d95d4f240
 +백포팅했으며 최신 upstream 전체를 덮어쓰지 않았습니다.
 +
 +관리자는 v2.1.1을 실제 Android 기기에서 잘 사용했다고 확인했습니다(2026-11-07).
-+이 경험과 v2.1.4 자동화 검증은 구분합니다. 새 UI의 기기 화면 확인, 실제 서버
-+handshake, 재생, DNS 경로 및 Wi-Fi/모바일 전환은 새로 실행한 것으로 간주하지
-+않습니다. [이번 변경 및 검증 기록](docs/wireguard-i18n-2.1.4.md)과
++이 경험과 v2.1.5 자동화 검증은 구분합니다. 실제 YouTube/Music 앱의 UI 확인, 서버 handshake, 재생, DNS 경로 및
++Wi-Fi/모바일 전환은 독립된 화면 하네스 검증과 구분하며 새로 실행한 것으로
++간주하지 않습니다. [이번 변경 및 검증 기록](docs/wireguard-i18n-2.1.5.md)과
 +[기기 검증 절차](docs/wireguard-device-acceptance.md)를 참고하세요.
++
++## v2.1.5 변경
++
++- 진입 메뉴와 내부 화면의 언어가 달라질 수 있던 문자열 조회 경로를 수정합니다.
++  내부 제목·설정 행·상태·대화상자·토스트는 현재 화면의 언어 컨텍스트를 사용하며
++  다른 화면에서 먼저 캐시한 영어 문자열을 재사용하지 않습니다.
++- 기존 Morphe 언어/재시작 규칙, 8개 언어 번역, 암호화된 프로필과 전송 구조는 유지합니다.
 +
 +## v2.1.4 변경
 +
@@ -114,11 +121,11 @@ index 000000000..d95d4f240
 +네이티브 payload는 Gradle의 `processResources` 전에 소스에서 자동으로 만듭니다.
 +Go 1.26.10, Android NDK 28.2.13676358, API 26이 필요합니다. 산출물은
 +`native/wireguard/build/android/<abi>/libmorphewireguard.so`와
-+`patches/build/libs/patches-2.1.4.mpp`입니다.
++`patches/build/libs/patches-2.1.5.mpp`입니다.
 +
 +최종 번들 생성 뒤 JVM/Android DEX 기본 선택을 모두 확인합니다.
 +`scripts/set-wireguard-defaults.py verify`는 검사용으로만 사용할 수 있습니다.
-+역사적인 v2.1.2 재패키징용 `repair`는 v2.1.4 빌드 경로가 아닙니다.
++역사적인 v2.1.2 재패키징용 `repair`는 v2.1.5 빌드 경로가 아닙니다.
 +
 +[네이티브 설명](native/wireguard/README.md)에 프로필 문법, Go/JNI 테스트 및
 +실패 정책을, [기기 체크리스트](docs/wireguard-device-acceptance.md)에 **예상 결과**와
@@ -138,13 +145,13 @@ index 000000000..d95d4f240
 +YouTube APK, SDK/도구체인, 계정·개인키·실제 프로필은 배포하지 않습니다.
 diff --git a/build-support/PUBLIC_SOURCE_BUILD.md b/build-support/PUBLIC_SOURCE_BUILD.md
 new file mode 100644
-index 000000000..70da6ecab
+index 000000000..cf4e592b5
 --- /dev/null
 +++ b/build-support/PUBLIC_SOURCE_BUILD.md
 @@ -0,0 +1,148 @@
 +# Building the unofficial WireGuard bundle from source
 +
-+The v2.1.4 source retains Morphe Patches v2.1.0 at
++The v2.1.5 source retains Morphe Patches v2.1.0 at
 +`8fa2c7a1a832498de8f179748998a3ca87e198eb`. Only the WireGuard maintenance
 +changes from the contribution branch are backported. Existing unrelated patch
 +sources and their dependency declarations are preserved.
@@ -263,7 +270,7 @@ index 000000000..70da6ecab
 +Use actual paths for the bundle and installed Android SDK/NDK:
 +
 +```sh
-+wireguard_bundle=patches/build/libs/patches-2.1.4.mpp
++wireguard_bundle=patches/build/libs/patches-2.1.5.mpp
 +python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 +python3 scripts/verify-wireguard-bundle.py "$wireguard_bundle" \
 +  --dexdump "$ANDROID_HOME/build-tools/36.0.0/dexdump"
@@ -289,7 +296,7 @@ index 000000000..70da6ecab
 +The checksums for the published release are in `RELEASE-SHA256SUMS.txt` in the
 +custom repository/release. Byte equality across other operating systems or NDK
 +host packages is not claimed. Do not run the historical artifact `repair`
-+subcommand to create v2.1.4; all release inputs come from this source build.
++subcommand to create v2.1.5; all release inputs come from this source build.
 diff --git a/build-support/public-plugin-optional-auth.patch b/build-support/public-plugin-optional-auth.patch
 new file mode 100644
 index 000000000..916c97d53
@@ -859,22 +866,253 @@ index 000000000..9cb162629
 +Original GPL-3.0/NOTICE terms, dependency sources/licenses and legal notices are
 +retained. See [source build instructions](wireguard-source-build.md) and the
 +historical [v2.1.3 maintenance report](wireguard-maintenance-2.1.3.md).
+diff --git a/docs/wireguard-i18n-2.1.5.md b/docs/wireguard-i18n-2.1.5.md
+new file mode 100644
+index 000000000..e92c4bc20
+--- /dev/null
++++ b/docs/wireguard-i18n-2.1.5.md
+@@ -0,0 +1,216 @@
++# WireGuard v2.1.5 internal settings localization fix
++
++This custom distribution retains Morphe Patches v2.1.0 at
++`8fa2c7a1a832498de8f179748998a3ca87e198eb`. The separate contribution branch
++uses an upstream `dev` base; its test counts are not custom-release test cases.
++
++## Reported regression and fix
++
++The v2.1.4 entry menu used Android XML string references, inflated in the Morphe
++settings Activity's localized context. Internal WireGuard titles, preference
++rows, status text, dialogs and toasts instead used `StringRef.str()`. That API
++resolves through a global Activity/application context and retains resolved
++values in a process-wide cache. A localized settings Activity could therefore
++display internal strings from another context or an earlier English lookup.
++
++The fix resolves internal strings with the WireGuard settings Activity's own
++resources. Its fragment uses the same owning Activity for lookup. The existing
++`BaseActivityHook.getAttachBaseContext` policy is retained: the default follows
++the supplied Android context, and an explicit Morphe language uses Morphe's
++localized context. Global `StringRef`, `ResourceUtils` and other settings pages
++are not changed. No new locale selector, runtime translation service or
++translation network request is added.
++
++The eight custom locale variants remain Korean, Japanese, simplified Chinese,
++traditional Chinese, Spanish, French, German and Brazilian Portuguese, with all
++60 WireGuard strings in each variant and English fallback. The 19 recognized
++native diagnostic codes still map to fixed resource keys; unknown or malformed
++payloads use the generic localized failure. Raw backend text, document URIs and
++profile values are not displayed. License and copyright notices stay verbatim.
++
++These translations were requested for the custom distribution. The official
++contribution retains English-source/Crowdin-managed translations and does not
++include the manual locale edits.
++
++## What the previous checks established
++
++The [v2.1.4 report](wireguard-i18n-2.1.4.md) records four patched APK cases and
++2,160 compiled resource value comparisons. Those results establish that the
++translations were included with the expected values. They did not exercise
++which context the internal Activity used to resolve displayed strings.
++Resource inclusion is distinct from runtime locale correctness. The historical
++report and v2.1.4 release assets remain unchanged.
++
++## Final artifact identity
++
++| Item | Value |
++| --- | --- |
++| Bundle | `morphe-wireguard-youtube-music-preview-2.1.5.mpp` |
++| Bundle SHA-256 | `ec0dc5bce25f795fbcae9c4abfd9a8dc2798e800355f88eb04f308f986998627` |
++| Release code commit | `8bd76d32607d2f9afbc212b5781585730ed1111f` |
++| Original source base | `8fa2c7a1a832498de8f179748998a3ca87e198eb` |
++| Native ABIs | `arm64-v8a`, `x86_64` |
++| Native minimum Android API | 26 |
++| Tools | Wrapper Gradle 9.8.2, JDK 21, SDK/Build-Tools 36, Go 1.26.10, NDK 28.2.13676358 |
++
++The source ZIP's `SOURCE-PROVENANCE.json` records its final frozen source
++commit. The bundle is built from source; no compiled default-selection flags
++are rewritten. Native sources, dependency pins, supported profile subset,
++transport and encrypted profile format/key alias are retained. Both patches
++remain default-selected; the actual connection default remains off, and import
++alone does not enable it.
++
++## Source and host regression checks
++
++The affected shared YouTube/Music Java module passed **64 tests**, with no
++failures, errors or skips, in each source tree. The complete source-built
++Android bundle and real Morphe loader passed: 202 patches for the custom base,
++203 for the dev-based contribution, and both default-selected WireGuard patches
++with app-specific dependencies. DEX/JNI/resources/notices/native inspections
++passed for both bundles.
++
++Actual bundled DEX was compared with v2.1.4: the settings Activity and nested
++classes had 24 global `StringRef.str` call sites before this fix and zero after
++it, with the context-explicit resource lookup present in both fixed bundles.
++This guards against accidentally testing changed source but packaging stale DEX.
++
++Both packaged native payloads are byte-identical to v2.1.4. Native sources, JNI
++signatures and dependency pins did not change, so the earlier native race/vet
++and JNI cohorts remain historical evidence rather than newly executed tests.
++
++| Native ABI | SHA-256 |
++| --- | --- |
++| arm64-v8a | `7d9d7056db514834f64db3fd054eb7b2afefe2b8ef62a4292140fe2d24ecdf48` |
++| x86_64 | `949f1d596c0363228c5338b82b5282cdecf00e8a18e61a0492f5639fdba67383` |
++
++## Final APK checks
++
++| App / version | Selection | Desktop `--validate` / inspection | Patched unsigned APK SHA-256 |
++| --- | --- | --- | --- |
++| YouTube 21.30.216 | focused | Passed | `cd7c4da3bf845aa8b4a18336fc58130c401f0cc2a9dd7a9a700c7e54d54be6f7` |
++| YouTube 21.30.216 | defaults | Passed | `5b3061a1c415ddfa3bd5f7f930cad9adf7b5d988f046baf83f6214240118aaaf` |
++| Music 9.30.53 | focused | Passed | `1475931db9ffa4aa4ae4b80e16e370c4ac54e7e5a3b255d206dc98d6c4cc1c7f` |
++| Music 9.30.53 | defaults | Passed | `8bbea484318dd070bd7f05489ac183197b4a77414d899832f298c0754427c954` |
++
++All four outputs matched all 60 English values and 60 values in each of the
++eight custom locale configurations: **2,160 compiled value comparisons passed**.
++These checks preserve the translations; runtime lookup is tested separately.
++The Google-signed originals passed signer allowlists and ZIP CRC. Universal
++YouTube used an explicitly derived unsigned arm64-only fixture with retained
++entry contents and package/version identity checked; Music used its original
++arm64 APK. No compatibility force flag was used. Desktop version was 2.1.1.
++Target APK execution on x86_64 was not tested; the x86_64 native payload passed
++static inspection only.
++
++APK patching, Desktop `--validate` and static resource/native inspections are
++host checks. Record the exact tested bundle and target versions, verified
++original signatures, any explicitly derived ABI-only fixture, and resulting
++APKs. A successful APK check does not establish target-app launch or runtime
++language behavior. No proprietary target APK is distributed.
++
++## Standalone Android Activity runtime checks
++
++The final [API 35/x86_64 accelerated CI run](https://github.com/seo-rii/morphe-patches/actions/runs/42613499701)
++passed. It used a fresh normal-storage Android 15 image, KVM CPU acceleration,
++two vCPUs and 2 GiB guest RAM. No SDK, system image or guest network policy was
++patched in this successful run. Only the disposable runner user received KVM
++device access; required emulator host libraries were installed normally.
++
++| Scenario | Pre-fix Activity | Fixed Activity |
++| --- | --- | --- |
++| Korean Activity, English host, primed English cache | Expected failure, 31 comparisons executed | 31 passed |
++| Korean Activity, English host, unprimed cache | Expected failure, 31 comparisons executed | 31 passed |
++| Explicit Morphe Korean, primed English cache | Expected failure, 31 comparisons executed | 31 passed |
++| Unsupported locale with English fallback, primed Korean cache | Expected failure, 31 comparisons executed | 31 passed |
++
++All **124 fixed-Activity comparisons passed**. The XML entry, Activity/toolbar,
++six rows, profile/saved/status summaries, navigation description, validation
++details and enable/disable/removal dialogs were checked. Structure-based waits
++separate dialog appearance/dismissal from language assertions; Material button
++capitalization is accepted only for the affected button label. Backend behavior
++is represented by explicit inert collaborators, not by provider connections.
++
++The actual Activity source hashes were:
++
++- Pre-fix: `6c13315531b185bb10898f917117bc8d34511580c702e1424b8b0e17629d9089`.
++- Fixed: `294df29ded72dc07979cb890c5926d8f6cb971b4abc53f69cb91159221e8518f`.
++
++The fixed source matches both contribution and custom-distribution source.
++BaseActivityHook and the public string/resource classes, collaborators and
++resource XML were byte-identical between baseline and fixed builds; the
++production Activity was their only differing Java input. Disposable package IDs
++and ephemeral test signing keys distinguish the standalone APKs.
++
++Earlier local API 30 attempts failed in platform setup before executing any UI
++case (NetworkStack/SystemServer and incomplete storage-service initialization).
++Their disposable-guest diagnostic settings were discarded with the owned VM;
++original AVDs, SDK and user data were preserved. Earlier hosted setup and
++accessibility-synchronization failures are separate attempts, not successful
++locale cases. The final successful cohort above supersedes those fixture runs.
++
++Reproduce with [the standalone harness](https://github.com/seo-rii/morphe-patches/blob/feat/wireguard-i18n-custom/tests/wireguard-settings-locale/README.md).
++Target-app steps below remain expected results, not completed acceptance tests.
++
++The standalone Android harness exercises production
++`WireGuardSettingsActivity` and `BaseActivityHook` code with backend
++collaborators stubbed. This isolates the Activity's locale/resource behavior
++from provider profiles, AndroidKeyStore and network transport. It is separate
++evidence from running the actual patched YouTube/Music applications. Any
++language scenario absent from the recorded runtime results remains unrun.
++
++## Not executed
++
++- Full target-app settings rendering, text wrapping/font layout, language
++  selection/restart and error display in the patched YouTube/Music apps.
++- Document-picker URI grants, live profile import and real-device
++  AndroidKeyStore/encryption behavior.
++- Real server handshake, video/music playback, DNS/traffic leak measurements,
++  failed-server recovery, Wi-Fi/mobile handoff and concurrent app/process use.
++- Reproduction of the reported system WireGuard coexistence failure on the
++  reporting user's device; this locale fix does not change network routing.
++- Reproduction of the previously reported import failure on that user's device.
++- A new full minimum/latest-experimental app-version/device matrix.
++
++The maintainer's successful v2.1.1 physical-device use remains a historical
++report. The [device acceptance checklist](wireguard-device-acceptance.md)
++contains expected results for unrun items, not verification results.
++
++## Target-app locale procedure (expected results; not run here)
++
++1. Refresh the custom source and patch/install each target app with the new
++   bundle. Keep target-app checks separate from the standalone harness.
++2. Select Korean in Morphe settings and perform the requested full app restart.
++   Open the WireGuard entry. Expected: its title, six rows, saved/profile/status
++   summaries and information dialog all use Korean.
++3. Switch Morphe to English and restart. Expected: the same UI uses English,
++   without retaining previously resolved Korean values.
++4. With Morphe language set to Default, repeat using a supported Android app or
++   system locale. Expected: the WireGuard screen follows the supplied settings
++   Activity locale. Record which selector and app were used.
++5. If checking validation text, use a public invalid document with no personal
++   keys, for example only `[Interface]`. Expected: a localized validation dialog
++   with fixed explanations; import alone does not enable routing or overwrite a
++   previously valid profile after failed validation. No live server is needed
++   for this text check.
++
++These are expected results and remain target-app acceptance work until recorded
++on the actual patched applications. Font/layout and provider/network checks are
++separate.
++
++## Security and distribution boundaries
++
++Only requests intercepted by the authenticated app-local HTTP proxy are
++tunneled through the userspace WireGuard stack. Intercepted requests have no
++direct fallback on failure. Local proxy readiness is not a remote handshake or
++Internet-access check. The patch does not register Android `VpnService`, use
++root, occupy the system VPN slot or provide a complete system kill switch.
++Unhooked requests and other processes remain outside the coverage claim.
++
++Supported profiles still require one peer, a numeric endpoint, explicit numeric
++DNS covered by `AllowedIPs` and an interface address family, and a supported
++64-bit APK. Root mounting, 32-bit ABIs, hostname endpoints, shell hooks and DNS
++search domains remain unsupported. Localization checks do not use or publish
++personal profiles, private keys or signing credentials.
++
++Original GPL-3.0/NOTICE terms, corresponding dependency sources, licenses and
++notices are retained. See [source build instructions](wireguard-source-build.md).
 diff --git a/docs/wireguard-i18n.md b/docs/wireguard-i18n.md
 new file mode 100644
-index 000000000..2685b91ee
+index 000000000..c458005d4
 --- /dev/null
 +++ b/docs/wireguard-i18n.md
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,64 @@
 +# WireGuard settings localization
 +
-+WireGuard uses the existing `shared-youtube` Android resource group, `StringRef`
-+and `BaseActivityHook` language context. It adds no separate locale selector or
-+runtime translation service. Labels and validation details follow the same
-+Morphe language/restart behavior as other settings pages.
++WireGuard uses the existing `shared-youtube` Android resource group and
++`BaseActivityHook` language context. Its standalone settings Activity resolves
++resource IDs and string values through its own Context. It adds no separate
++locale selector or runtime translation service. Labels and validation details
++follow the same Morphe language/restart behavior as other settings pages.
++
++The entry preference is inflated from XML in the Morphe settings Activity.
++Using `StringRef.str()` for the separate screen was incorrect: it resolves from
++a global activity/application Context and retains values in a process-wide
++cache. That can leave the internal screen in English while the entry menu is
++localized. Internal titles, summaries, dialogs, toasts and navigation text now
++use the owning Activity's resources without changing shared global lookup or
++clearing other patches' caches.
 +
 +The Go parser returns one of 19 stable diagnostic codes through the existing JNI
 +exception. Java maps only known codes to English XML resource keys, and the
-+Activity resolves those keys through `str(...)`. Unknown, legacy or malformed
++Activity resolves those keys through its own localized resources. Unknown, legacy or malformed
 +payloads use the localized generic validation failure; raw backend text is never
 +shown. Go's value-free English `Error()` remains available to non-UI diagnostics.
 +
@@ -901,7 +1139,7 @@ index 000000000..2685b91ee
 +compiled APK resources. Run the following after patching the target APKs:
 +
 +```sh
-+python3 scripts/verify-wireguard-locales.py patches/build/libs/patches-2.1.4.mpp \
++python3 scripts/verify-wireguard-locales.py patches/build/libs/patches-2.1.5.mpp \
 +  --aapt2 "$ANDROID_HOME/build-tools/36.0.0/aapt2" \
 +  --apk /path/to/patched-youtube.apk --apk /path/to/patched-music.apk \
 +  --output /path/to/compiled-locales.json
@@ -913,6 +1151,13 @@ index 000000000..2685b91ee
 +Android rendering and language switching remain device checks. See the
 +[v2.1.4 release record](wireguard-i18n-2.1.4.md) for results. Published v2.1.3
 +assets and its corresponding source remain unchanged.
++
++
++The optional [standalone Android locale regression](../tests/wireguard-settings-locale/README.md) compares the
++production screen before/after the fix with an English host or stale cache. Its
++backend collaborators are explicit stubs; it does not replace target-app testing.
++The test source is shared by both streams and accepts external Korean resources
++without modifying Crowdin-managed product files.
 diff --git a/docs/wireguard-maintenance-2.1.3.md b/docs/wireguard-maintenance-2.1.3.md
 new file mode 100644
 index 000000000..f5de8b600
@@ -1271,13 +1516,13 @@ index 000000000..feda96617
 +treating the preview as reliable. This is not a system-wide VPN or kill switch.
 diff --git a/docs/wireguard-source-build.md b/docs/wireguard-source-build.md
 new file mode 100644
-index 000000000..6190b6e94
+index 000000000..bd7eb95a4
 --- /dev/null
 +++ b/docs/wireguard-source-build.md
 @@ -0,0 +1,148 @@
 +# Building the unofficial WireGuard bundle from source
 +
-+The v2.1.4 source retains Morphe Patches v2.1.0 at
++The v2.1.5 source retains Morphe Patches v2.1.0 at
 +`8fa2c7a1a832498de8f179748998a3ca87e198eb`. Only the WireGuard maintenance
 +changes from the contribution branch are backported. Existing unrelated patch
 +sources and their dependency declarations are preserved.
@@ -1396,7 +1641,7 @@ index 000000000..6190b6e94
 +Use actual paths for the bundle and installed Android SDK/NDK:
 +
 +```sh
-+wireguard_bundle=patches/build/libs/patches-2.1.4.mpp
++wireguard_bundle=patches/build/libs/patches-2.1.5.mpp
 +python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 +python3 scripts/verify-wireguard-bundle.py "$wireguard_bundle" \
 +  --dexdump "$ANDROID_HOME/build-tools/36.0.0/dexdump"
@@ -1422,7 +1667,7 @@ index 000000000..6190b6e94
 +The checksums for the published release are in `RELEASE-SHA256SUMS.txt` in the
 +custom repository/release. Byte equality across other operating systems or NDK
 +host packages is not claimed. Do not run the historical artifact `repair`
-+subcommand to create v2.1.4; all release inputs come from this source build.
++subcommand to create v2.1.5; all release inputs come from this source build.
 diff --git a/docs/wireguard-verification.md b/docs/wireguard-verification.md
 new file mode 100644
 index 000000000..dd8c3c1f8
@@ -2656,16 +2901,14 @@ index 000000000..ac341e412
 +}
 diff --git a/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/WireGuardSettingsActivity.java b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/WireGuardSettingsActivity.java
 new file mode 100644
-index 000000000..d8dc9228d
+index 000000000..4bf08951a
 --- /dev/null
 +++ b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/WireGuardSettingsActivity.java
-@@ -0,0 +1,437 @@
+@@ -0,0 +1,441 @@
 +// SPDX-License-Identifier: GPL-3.0-only
 +// See the included NOTICE file for additional GPLv3 Section 7 requirements.
 +
 +package app.morphe.extension.shared.wireguard;
-+
-+import static app.morphe.extension.shared.StringRef.str;
 +
 +import android.app.Activity;
 +import android.app.AlertDialog;
@@ -2731,7 +2974,7 @@ index 000000000..d8dc9228d
 +    protected void onCreate(@Nullable Bundle savedInstanceState) {
 +        customizeActivityTheme(this);
 +        super.onCreate(savedInstanceState);
-+        setTitle(str("morphe_wireguard_settings_title"));
++        setTitle(localizedString("morphe_wireguard_settings_title"));
 +        setContentView(getContentViewResourceId());
 +        getWindow().getDecorView().setBackgroundColor(ThemeUtils.getAppBackgroundColor());
 +
@@ -2790,12 +3033,13 @@ index 000000000..d8dc9228d
 +
 +    @Override
 +    protected void onPostToolbarSetup(Activity activity, Toolbar toolbar, PreferenceFragment fragment) {
-+        toolbar.setTitle(str("morphe_wireguard_settings_title"));
++        toolbar.setTitle(localizedString("morphe_wireguard_settings_title"));
++        toolbar.setNavigationContentDescription(localizedString("morphe_settings_navigate_up"));
 +        toolbar.setFilterTouchesWhenObscured(true);
 +        ToolbarPreferenceFragment.addToolbarButton(toolbar, "morphe_settings_screen_00_about",
-+                str("morphe_settings_screen_info_title"), () -> new AlertDialog.Builder(this)
-+                        .setTitle(str("morphe_wireguard_settings_title"))
-+                        .setMessage(str("morphe_wireguard_intro"))
++                localizedString("morphe_settings_screen_info_title"), () -> new AlertDialog.Builder(this)
++                        .setTitle(localizedString("morphe_wireguard_settings_title"))
++                        .setMessage(localizedString("morphe_wireguard_intro"))
 +                        .setPositiveButton(android.R.string.ok, null)
 +                        .show());
 +    }
@@ -2842,11 +3086,11 @@ index 000000000..d8dc9228d
 +    private void confirmToggle() {
 +        final boolean enable = !SharedYouTubeSettings.WIREGUARD_ENABLED.get();
 +        new AlertDialog.Builder(this)
-+                .setTitle(str("morphe_wireguard_settings_title"))
-+                .setMessage(str(enable ? "morphe_wireguard_enable_confirm"
++                .setTitle(localizedString("morphe_wireguard_settings_title"))
++                .setMessage(localizedString(enable ? "morphe_wireguard_enable_confirm"
 +                        : "morphe_wireguard_disable_confirm"))
 +                .setNegativeButton(android.R.string.cancel, null)
-+                .setPositiveButton(str("morphe_wireguard_apply_restart"), (dialog, which) -> {
++                .setPositiveButton(localizedString("morphe_wireguard_apply_restart"), (dialog, which) -> {
 +                    Context application = getApplicationContext();
 +                    runOperation(() -> {
 +                        if (enable) ProfileOperations.validateStoredProfile(application);
@@ -2861,10 +3105,10 @@ index 000000000..d8dc9228d
 +
 +    private void confirmRemove() {
 +        new AlertDialog.Builder(this)
-+                .setTitle(str("morphe_wireguard_remove"))
-+                .setMessage(str("morphe_wireguard_remove_confirm"))
++                .setTitle(localizedString("morphe_wireguard_remove"))
++                .setMessage(localizedString("morphe_wireguard_remove_confirm"))
 +                .setNegativeButton(android.R.string.cancel, null)
-+                .setPositiveButton(str("morphe_wireguard_apply_restart"), (dialog, which) -> {
++                .setPositiveButton(localizedString("morphe_wireguard_apply_restart"), (dialog, which) -> {
 +                    Context application = getApplicationContext();
 +                    runOperation(() -> {
 +                        WireGuardConfigStore.delete(application);
@@ -2906,12 +3150,12 @@ index 000000000..d8dc9228d
 +    }
 +
 +    private void showProfileFailure(String resourceKey, @Nullable String validationReasonKey) {
-+        String message = str(resourceKey);
++        String message = localizedString(resourceKey);
 +        if (validationReasonKey != null && !validationReasonKey.isEmpty()) {
-+            message += "\n\n" + str(validationReasonKey);
++            message += "\n\n" + localizedString(validationReasonKey);
 +        }
 +        new AlertDialog.Builder(this)
-+                .setTitle(str("morphe_wireguard_profile_error_title"))
++                .setTitle(localizedString("morphe_wireguard_profile_error_title"))
 +                .setMessage(message)
 +                .setPositiveButton(android.R.string.ok, null)
 +                .show();
@@ -2937,7 +3181,7 @@ index 000000000..d8dc9228d
 +            ScrollView scroll = new ScrollView(this);
 +            scroll.addView(text);
 +            new AlertDialog.Builder(this)
-+                    .setTitle(str("morphe_wireguard_licenses"))
++                    .setTitle(localizedString("morphe_wireguard_licenses"))
 +                    .setView(scroll)
 +                    .setPositiveButton(android.R.string.ok, null)
 +                    .show();
@@ -2962,8 +3206,13 @@ index 000000000..d8dc9228d
 +        notices.append("\n\n");
 +    }
 +
++    private String localizedString(String key) {
++        // Match this screen's locale without reusing process-wide cached string values.
++        return getString(ResourceUtils.getIdentifierOrThrow(this, ResourceType.STRING, key));
++    }
++
 +    private void toast(String key) {
-+        Toast.makeText(this, str(key), Toast.LENGTH_LONG).show();
++        Toast.makeText(this, localizedString(key), Toast.LENGTH_LONG).show();
 +    }
 +
 +    /** Framework-restorable preference list; profile operations remain owned by the Activity. */
@@ -2993,7 +3242,7 @@ index 000000000..d8dc9228d
 +            screen.setOrderingAsAdded(true);
 +
 +            enabled = new RoutingSwitchPreference(activity);
-+            enabled.setTitle(str("morphe_wireguard_enabled_title"));
++            enabled.setTitle(activity.localizedString("morphe_wireguard_enabled_title"));
 +            enabled.setOnPreferenceChangeListener((preference, value) -> {
 +                activity.confirmToggle();
 +                // Only validation and the confirmation handler may persist this setting.
@@ -3002,7 +3251,7 @@ index 000000000..d8dc9228d
 +            screen.addPreference(enabled);
 +
 +            status = new ActionPreference(activity);
-+            status.setTitle(str("morphe_wireguard_status_title"));
++            status.setTitle(activity.localizedString("morphe_wireguard_status_title"));
 +            status.setSelectable(false);
 +            screen.addPreference(status);
 +
@@ -3023,10 +3272,10 @@ index 000000000..d8dc9228d
 +            if (list != null) list.setFilterTouchesWhenObscured(true);
 +        }
 +
-+        private static Preference action(PreferenceScreen screen, Context context, String titleKey,
-+                                         Runnable onClick) {
-+            Preference preference = new ActionPreference(context);
-+            preference.setTitle(str(titleKey));
++        private static Preference action(PreferenceScreen screen, WireGuardSettingsActivity activity,
++                                         String titleKey, Runnable onClick) {
++            Preference preference = new ActionPreference(activity);
++            preference.setTitle(activity.localizedString(titleKey));
 +            preference.setOnPreferenceClickListener(clicked -> {
 +                onClick.run();
 +                return true;
@@ -3047,16 +3296,16 @@ index 000000000..d8dc9228d
 +                case READY -> "morphe_wireguard_state_ready";
 +                case BLOCKED -> "morphe_wireguard_state_blocked";
 +            };
-+            String state = str(available ? stateKey : "morphe_wireguard_unavailable");
-+            if (activity.busy) state += "\n\n" + str("morphe_wireguard_busy");
++            String state = activity.localizedString(available ? stateKey : "morphe_wireguard_unavailable");
++            if (activity.busy) state += "\n\n" + activity.localizedString("morphe_wireguard_busy");
 +            status.setSummary(state);
 +            enabled.setChecked(savedEnabled);
-+            enabled.setSummary(str(savedEnabled ? "morphe_wireguard_saved_enabled"
++            enabled.setSummary(activity.localizedString(savedEnabled ? "morphe_wireguard_saved_enabled"
 +                    : "morphe_wireguard_saved_disabled"));
-+            importProfile.setSummary(str(hasProfile ? "morphe_wireguard_profile_present"
++            importProfile.setSummary(activity.localizedString(hasProfile ? "morphe_wireguard_profile_present"
 +                    : "morphe_wireguard_profile_missing"));
 +            restartApp.setSummary(WireGuardProxy.isRestartRequired()
-+                    ? str("morphe_wireguard_restart_needed") : null);
++                    ? activity.localizedString("morphe_wireguard_restart_needed") : null);
 +
 +            enabled.setEnabled(available && !activity.busy && (hasProfile || savedEnabled));
 +            importProfile.setEnabled(available && !activity.busy);
@@ -4503,7 +4752,7 @@ index 0cde5caa1..152043b35 100644
      }
  }
 diff --git a/gradle.properties b/gradle.properties
-index 78ed265f3..b3693e1ec 100644
+index 78ed265f3..4466ab11a 100644
 --- a/gradle.properties
 +++ b/gradle.properties
 @@ -5,4 +5,4 @@ android.useAndroidX = true
@@ -4511,7 +4760,7 @@ index 78ed265f3..b3693e1ec 100644
  # Extensions are Java only. Prevents adding the Kotlin stdlib.
  kotlin.stdlib.default.dependency = false
 -version = 2.1.0
-+version = 2.1.4
++version = 2.1.5
 diff --git a/native/wireguard/.gitignore b/native/wireguard/.gitignore
 new file mode 100644
 index 000000000..79d701b89
@@ -11718,3 +11967,671 @@ index 000000000..4432210f9
 +        System.out.println("All host JNI checks passed: " + checks);
 +    }
 +}
+diff --git a/tests/wireguard-settings-locale/README.md b/tests/wireguard-settings-locale/README.md
+new file mode 100644
+index 000000000..77a3d3a58
+--- /dev/null
++++ b/tests/wireguard-settings-locale/README.md
+@@ -0,0 +1,88 @@
++# Standalone Android settings locale regression
++
++This optional test builds the production `WireGuardSettingsActivity` and
++`BaseActivityHook`, plus the public dependency's actual `StringRef`,
++`ResourceUtils` and `ResourceType`. Android preferences, resources, toolbars and
++dialogs run on a disposable emulator. Transport, stored settings, theme helpers
++and profile operations are explicit test collaborators, not a live backend.
++It does not install or validate YouTube/Music, use a provider profile, or test
++AndroidKeyStore, native networking, playback or system VPN coexistence.
++
++Both variants use identical collaborators and resources; the production
++Activity/base-hook snapshots, disposable package IDs and ephemeral signing keys
++distinguish the APKs. Each runs four fresh-process scenarios: Korean Activity with English host and
++cached English strings; the same without priming the cache; Morphe Korean with
++cached English; and an unsupported locale's English fallback with cached Korean.
++The runner requires the old implementation to fail and the fixed one to pass.
++It checks the XML entry, internal titles/summaries/states, toolbar/navigation
++description, validation details and enable/disable/removal dialogs. Toast display,
++license contents, target-app themes and text wrapping remain outside this test.
++
++## Build
++
++Use JDK 21, Android platform 36 and Build-Tools 36.0.0. No Gradle or new Maven
++dependency is needed. Run from the source repository root in Bash, using fresh
++output paths. `wireguard_library` is the pinned `morphe-patches-library` source
++checkout from the public source build. The Korean XML must provide all 60 keys;
++the builder rejects missing keys or an English-only substitute. The contribution
++can use an external custom-source/Crowdin file without changing product locale
++files. Generated test resources and APKs never enter the patch bundle.
++
++| Source stream | Pre-fix Git commit |
++| --- | --- |
++| Custom distribution | `8a87d95bf51a90b2206c5fa1b414316b06c539cb` |
++| Contribution branch | `dc3819a6920bef55b71bb8708378e3dcb01f6497` |
++
++```sh
++wireguard_ui_out=/path/to/new-ui-validation
++wireguard_library=/path/to/morphe-patches-library
++wireguard_korean=/path/to/custom-source/patches/src/main/resources/addresources/values-ko-rKR/shared-youtube/strings.xml
++wireguard_baseline=8a87d95bf51a90b2206c5fa1b414316b06c539cb
++export JAVA_HOME=/path/to/jdk-21
++export ANDROID_HOME=/path/to/android-sdk
++
++for wireguard_variant in baseline fixed; do
++  wireguard_ui_args=()
++  if [ "$wireguard_variant" = baseline ]; then
++    wireguard_ui_args=(--baseline-commit "$wireguard_baseline")
++  fi
++  python3 tests/wireguard-settings-locale/build_harness.py \
++    --source "$PWD" --library "$wireguard_library" \
++    --korean-resources "$wireguard_korean" \
++    --sdk "$ANDROID_HOME" --jdk "$JAVA_HOME" \
++    --variant "$wireguard_variant" "${wireguard_ui_args[@]}" \
++    --output "$wireguard_ui_out/builds/$wireguard_variant"
++done
++```
++
++For source ZIPs without Git metadata, build the baseline with `--source` pointing
++to the extracted v2.1.4 source and omit `--baseline-commit`; use the fixed source
++for the second build. Public dependency sources are supplied separately in the
++corresponding source ZIP. Each APK uses a newly generated, short-lived test key;
++keep generated outputs outside the repository and release assets.
++
++## Run
++
++Create and boot a disposable API 30 or newer emulator using normal SDK tooling.
++The caller owns its lifecycle and storage. The runner accepts an explicit
++`emulator-*` serial, uninstalls only its two disposable test package IDs, and
++does not create/reset an AVD or change system locale. Allow sufficient disk space
++for the emulator's normal image requirements. Ordinary CI builds do not start
++an emulator. Maintainers can explicitly dispatch the contribution's existing
++`Build pull request` workflow with `wireguard_locale_test=true` for an isolated,
++accelerated Android 15 (API 35) run. That job uses pinned external Korean test
++resources without editing product translations and skips the unrelated full
++build for that UI-only dispatch.
++
++```sh
++python3 tests/wireguard-settings-locale/run_harness.py \
++  --adb "$ANDROID_HOME/platform-tools/adb" --serial emulator-5584 \
++  --builds "$wireguard_ui_out/builds" --output "$wireguard_ui_out/results"
++```
++
++The expected result is four baseline failures and four fixed passes, with 31
++checks per scenario. These are expected results until the runner records them.
++An emulator/build failure, missing instrumentation output or unexpected baseline
++pass fails the run. Save `build-result.json`, source/resource hashes, per-case
++instrumentation output and the final `result.json`. This remains standalone
++Activity evidence, distinct from acceptance testing in patched target apps.
+diff --git a/tests/wireguard-settings-locale/RegressionInstrumentation.java b/tests/wireguard-settings-locale/RegressionInstrumentation.java
+new file mode 100644
+index 000000000..f2f972e63
+--- /dev/null
++++ b/tests/wireguard-settings-locale/RegressionInstrumentation.java
+@@ -0,0 +1,257 @@
++// SPDX-License-Identifier: GPL-3.0-only
++// See the included NOTICE file for additional GPLv3 Section 7 requirements.
++package app.morphe.wireguard.locale;
++
++import android.app.Activity;
++import android.app.AlertDialog;
++import android.app.Instrumentation;
++import android.app.UiAutomation;
++import android.accessibilityservice.AccessibilityServiceInfo;
++import android.content.Context;
++import android.content.Intent;
++import android.content.res.Configuration;
++import android.os.Bundle;
++import android.os.SystemClock;
++import android.preference.Preference;
++import android.preference.PreferenceScreen;
++import android.view.View;
++import android.view.ViewGroup;
++import android.view.accessibility.AccessibilityNodeInfo;
++import android.widget.Toolbar;
++import java.lang.reflect.Field;
++import java.lang.reflect.Method;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Locale;
++import app.morphe.extension.shared.ResourceUtils;
++import app.morphe.extension.shared.StringRef;
++import app.morphe.extension.shared.Utils;
++import app.morphe.extension.shared.settings.AppLanguage;
++import app.morphe.extension.shared.settings.BaseSettings;
++import app.morphe.extension.shared.settings.SharedYouTubeSettings;
++import app.morphe.extension.shared.wireguard.WireGuardConfigStore;
++import app.morphe.extension.shared.wireguard.WireGuardProxy;
++import app.morphe.extension.shared.wireguard.WireGuardSettingsActivity;
++
++/** Actual Android Activity and widget regression, with inert transport/settings collaborators. */
++public final class RegressionInstrumentation extends Instrumentation {
++    private static final long DIALOG_TIMEOUT_MS=10_000;
++    private static final long DIALOG_POLL_MS=50;
++    private static final int DIALOG_STABLE_POLLS=3;
++    private Bundle args;
++    private final List<String> failures=new ArrayList<>();
++    private int checks;
++    private String scenario;
++    private String localLanguage;
++    private Activity settings;
++    private UiAutomation automation;
++
++    @Override public void onCreate(Bundle arguments) { args=arguments;start(); }
++
++    private Context locale(Context context,String language) {
++        Configuration c=new Configuration(context.getResources().getConfiguration());
++        c.setLocale(Locale.forLanguageTag(language));return context.createConfigurationContext(c);
++    }
++
++    @Override public Activity newActivity(ClassLoader loader,String name,Intent intent)
++            throws InstantiationException,IllegalAccessException,ClassNotFoundException {
++        Activity activity=super.newActivity(loader,name,intent);
++        Configuration c=new Configuration();
++        c.setLocale(Locale.forLanguageTag(name.endsWith("HostActivity") ? "en" : localLanguage));
++        activity.applyOverrideConfiguration(c);
++        return activity;
++    }
++
++    @Override public void callActivityOnCreate(Activity activity,Bundle state) {
++        // Headless tests must not depend on a fixture's keyguard or display sleep state.
++        activity.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
++                | android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
++                | android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
++                | android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
++        super.callActivityOnCreate(activity,state);
++    }
++
++    private void equal(String label,CharSequence actual,String expected) {
++        checks++; if(!expected.contentEquals(actual==null ? "<null>" : actual)) {
++            failures.add(label+": expected="+expected+"; actual="+actual);
++        }
++    }
++
++    private String text(String key) {
++        return settings.getString(settings.getResources().getIdentifier(key,"string",settings.getPackageName()));
++    }
++
++    private void invoke(String name,Class<?>[] types,Object... values) {
++        try { Method m=WireGuardSettingsActivity.class.getDeclaredMethod(name,types);m.setAccessible(true);m.invoke(settings,values); }
++        catch(Exception e){throw new RuntimeException(e);}
++    }
++
++    private void refresh() { invoke("refreshState",new Class<?>[0]); }
++
++    private Toolbar toolbar(View view) {
++        if(view instanceof Toolbar t)return t;
++        if(view instanceof ViewGroup g)for(int i=0;i<g.getChildCount();i++){Toolbar t=toolbar(g.getChildAt(i));if(t!=null)return t;}
++        return null;
++    }
++
++    private void initializeAccessibility() {
++        automation=getUiAutomation();
++        AccessibilityServiceInfo info=automation.getServiceInfo();
++        if(info==null)throw new IllegalStateException("Accessibility service is unavailable");
++        info.flags|=AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
++        automation.setServiceInfo(info);
++    }
++
++    private boolean hasDialogButton(AccessibilityNodeInfo root) {
++        if("android:id/button1".equals(root.getViewIdResourceName()) && root.isVisibleToUser()) {
++            return true;
++        }
++        for(int i=0;i<root.getChildCount();i++) {
++            AccessibilityNodeInfo child=root.getChild(i);
++            if(child==null)continue;
++            boolean visible=hasDialogButton(child);
++            child.recycle();
++            if(visible)return true;
++        }
++        return false;
++    }
++
++    private AccessibilityNodeInfo awaitDialogState(String name,boolean shown) throws Exception {
++        final long deadline=SystemClock.uptimeMillis()+DIALOG_TIMEOUT_MS;
++        int stable=0;
++        int previousWindow=-1;
++        boolean rootPresent=false;
++        boolean buttonVisible=false;
++        while(SystemClock.uptimeMillis()<deadline) {
++            AccessibilityNodeInfo root=automation.getRootInActiveWindow();
++            rootPresent=root!=null;
++            if(rootPresent) {
++                buttonVisible=hasDialogButton(root);
++                final int window=root.getWindowId();
++                if(buttonVisible==shown) {
++                    stable=window==previousWindow ? stable+1 : 1;
++                    previousWindow=window;
++                    if(stable>=DIALOG_STABLE_POLLS)return root;
++                } else {
++                    stable=0;
++                    previousWindow=-1;
++                }
++                root.recycle();
++            } else {
++                stable=0;
++                previousWindow=-1;
++            }
++            Thread.sleep(DIALOG_POLL_MS);
++        }
++        // Synchronization depends only on structure, never the expected translation.
++        throw new IllegalStateException("Dialog fixture timeout: "+name+", shown="+shown
++                +", rootPresent="+rootPresent+", positiveButtonVisible="+buttonVisible);
++    }
++
++    private List<String> openDialog(String name,Runnable open) throws Exception {
++        awaitDialogState(name+" before opening",false).recycle();
++        runOnMainSync(open);
++        waitForIdleSync();
++        List<String> result=new ArrayList<>();
++        collect(awaitDialogState(name+" opening",true),result);
++        return result;
++    }
++
++    private void dismissDialog(String name) throws Exception {
++        if(!automation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)) {
++            throw new IllegalStateException("Could not dismiss dialog fixture: "+name);
++        }
++        waitForIdleSync();
++        awaitDialogState(name+" dismissal",false).recycle();
++    }
++
++    private void collect(AccessibilityNodeInfo node,List<String> out) {
++        if(node==null)return;
++        if(node.getText()!=null)out.add(node.getText().toString());
++        for(int i=0;i<node.getChildCount();i++){AccessibilityNodeInfo child=node.getChild(i);collect(child,out);}
++        node.recycle();
++    }
++
++    private void dialog(String name,Runnable open,String... expectedKeys) throws Exception {
++        List<String> shown=openDialog(name,open);
++        for(String key:expectedKeys) {
++            checks++;
++            String expected=text(key);
++            boolean matches=shown.contains(expected);
++            // Material buttons may expose their all-caps presentation to accessibility.
++            if(!matches && key.equals("morphe_wireguard_apply_restart")) {
++                matches=shown.contains(expected.toUpperCase(settings.getResources().getConfiguration().getLocales().get(0)));
++            }
++            if(!matches)failures.add(name+": missing "+expected+"; visible="+shown);
++        }
++        dismissDialog(name);
++    }
++
++    @Override public void onStart() {
++        Bundle result=new Bundle();
++        try {
++            initializeAccessibility();
++            scenario=args.getString("scenario","activity-ko-cached-en");
++            localLanguage=scenario.equals("english-fallback") ? "zz" : "ko";
++            Context base=getTargetContext();
++            Utils.context=locale(base,scenario.equals("english-fallback") ? "ko" : "en");
++            HostActivity host=(HostActivity)startActivitySync(new Intent().setClassName(base.getPackageName(),HostActivity.class.getName()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
++            Utils.activity=host;
++            if(scenario.equals("english-fallback"))ResourceUtils.useActivityContextIfAvailable=false;
++            List<String> keys=new ArrayList<>();
++            for(String key:args.getString("keys").split(","))keys.add(key);
++            if(!scenario.equals("activity-ko-unprimed"))for(String key:keys)StringRef.str(key);
++            if(scenario.equals("morphe-ko-cached-en")) {
++                Utils.context=locale(base,"ko");BaseSettings.MORPHE_LANGUAGE.value=AppLanguage.KO;
++                ResourceUtils.useActivityContextIfAvailable=false;
++            }
++            EntryActivity entry=(EntryActivity)startActivitySync(new Intent().setClassName(base.getPackageName(),EntryActivity.class.getName()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
++            waitForIdleSync();
++            runOnMainSync(()->{
++                int title=entry.getResources().getIdentifier("morphe_wireguard_settings_title","string",entry.getPackageName());
++                equal("entry XML title",entry.getPreferenceScreen().getPreference(0).getTitle(),entry.getString(title));
++                entry.finish();
++            });
++            settings=startActivitySync(new Intent().setClassName(base.getPackageName(),WireGuardSettingsActivity.class.getName()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
++            waitForIdleSync();
++            runOnMainSync(()->{
++                equal("activity title",settings.getTitle(),text("morphe_wireguard_settings_title"));
++                Toolbar bar=toolbar(settings.getWindow().getDecorView());
++                equal("toolbar title",bar.getTitle(),text("morphe_wireguard_settings_title"));
++                equal("navigation description",bar.getNavigationContentDescription(),text("morphe_settings_navigate_up"));
++                WireGuardSettingsActivity.SettingsFragment fragment=(WireGuardSettingsActivity.SettingsFragment)settings.getFragmentManager().findFragmentById(settings.getResources().getIdentifier("morphe_settings_fragments","id",settings.getPackageName()));
++                PreferenceScreen screen=fragment.getPreferenceScreen();
++                String[] titles={"enabled_title","status_title","import","remove","restart","licenses"};
++                for(int i=0;i<titles.length;i++)equal("row "+i,screen.getPreference(i).getTitle(),text("morphe_wireguard_"+titles[i]));
++                equal("disabled state",screen.getPreference(1).getSummary(),text("morphe_wireguard_state_disabled"));
++                equal("disabled summary",screen.getPreference(0).getSummary(),text("morphe_wireguard_saved_disabled"));
++                equal("missing profile",screen.getPreference(2).getSummary(),text("morphe_wireguard_profile_missing"));
++                WireGuardConfigStore.present=true;SharedYouTubeSettings.WIREGUARD_ENABLED.value=true;
++                WireGuardProxy.restart=true;WireGuardProxy.current=WireGuardProxy.State.READY;refresh();
++                equal("ready state",screen.getPreference(1).getSummary(),text("morphe_wireguard_state_ready"));
++                equal("enabled summary",screen.getPreference(0).getSummary(),text("morphe_wireguard_saved_enabled"));
++                equal("present profile",screen.getPreference(2).getSummary(),text("morphe_wireguard_profile_present"));
++                equal("restart needed",screen.getPreference(4).getSummary(),text("morphe_wireguard_restart_needed"));
++                WireGuardProxy.current=WireGuardProxy.State.BLOCKED;refresh();
++                equal("blocked state",screen.getPreference(1).getSummary(),text("morphe_wireguard_state_blocked"));
++                WireGuardProxy.current=WireGuardProxy.State.NOT_STARTED;refresh();
++                equal("pending state",screen.getPreference(1).getSummary(),text("morphe_wireguard_state_pending"));
++                try {Field busy=WireGuardSettingsActivity.class.getDeclaredField("busy");busy.setAccessible(true);busy.setBoolean(settings,true);refresh();
++                    equal("busy state",screen.getPreference(1).getSummary(),text("morphe_wireguard_state_pending")+"\n\n"+text("morphe_wireguard_busy"));busy.setBoolean(settings,false);refresh();}
++                catch(Exception e){throw new RuntimeException(e);}
++            });
++            dialog("error",()->invoke("showProfileFailure",new Class<?>[]{String.class,String.class},"morphe_wireguard_validation_failed","morphe_wireguard_error_invalid_endpoint"),"morphe_wireguard_profile_error_title");
++            // Combined message is one real TextView, so verify both detail components together.
++            List<String> shown=openDialog("error details",()->invoke("showProfileFailure",new Class<?>[]{String.class,String.class},"morphe_wireguard_validation_failed","morphe_wireguard_error_invalid_endpoint"));
++            String combined=text("morphe_wireguard_validation_failed")+"\n\n"+text("morphe_wireguard_error_invalid_endpoint");checks++;if(!shown.contains(combined))failures.add("error details: expected="+combined+"; visible="+shown);
++            dismissDialog("error details");
++            dialog("disable confirmation",()->invoke("confirmToggle",new Class<?>[0]),"morphe_wireguard_settings_title","morphe_wireguard_disable_confirm","morphe_wireguard_apply_restart");
++            SharedYouTubeSettings.WIREGUARD_ENABLED.value=false;
++            dialog("enable confirmation",()->invoke("confirmToggle",new Class<?>[0]),"morphe_wireguard_settings_title","morphe_wireguard_enable_confirm","morphe_wireguard_apply_restart");
++            dialog("remove confirmation",()->invoke("confirmRemove",new Class<?>[0]),"morphe_wireguard_remove","morphe_wireguard_remove_confirm","morphe_wireguard_apply_restart");
++            runOnMainSync(()->settings.finish());
++            result.putString("status",failures.isEmpty()?"PASS":"FAIL");result.putString("scenario",scenario);result.putInt("checks",checks);result.putString("failures",failures.toString());
++            finish(failures.isEmpty()?Activity.RESULT_OK:Activity.RESULT_CANCELED,result);
++        } catch(Throwable t) {result.putString("status","ERROR");result.putString("error",android.util.Log.getStackTraceString(t));finish(Activity.RESULT_CANCELED,result);}
++    }
++}
+diff --git a/tests/wireguard-settings-locale/build_harness.py b/tests/wireguard-settings-locale/build_harness.py
+new file mode 100644
+index 000000000..9fac88343
+--- /dev/null
++++ b/tests/wireguard-settings-locale/build_harness.py
+@@ -0,0 +1,195 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-3.0-only
++# See the included NOTICE file for additional GPLv3 Section 7 requirements.
++"""Build a standalone Android WireGuard settings locale regression APK.
++
++Real sources: Activity, BaseActivityHook, StringRef, ResourceUtils, ResourceType.
++Real Android runtime resources/widgets/dialogs; collaborators are explicit stubs.
++This is not a YouTube/Music integration test. No native transport is exercised.
++"""
++import argparse
++import hashlib
++import json
++import subprocess
++import textwrap
++from pathlib import Path
++import xml.etree.ElementTree as ET
++import zipfile
++
++
++STUBS = {
++    'androidx/annotation/Nullable.java': 'package androidx.annotation; public @interface Nullable {}',
++    'androidx/annotation/NonNull.java': 'package androidx.annotation; public @interface NonNull {}',
++    'androidx/annotation/ColorInt.java': 'package androidx.annotation; public @interface ColorInt {}',
++    'app/morphe/extension/shared/Logger.java': '''
++        package app.morphe.extension.shared;
++        import java.util.function.Supplier;
++        public final class Logger {
++          public static void printException(Supplier<String> s) { android.util.Log.e("WG-Locale",s.get()); }
++          public static void printException(Supplier<String> s, Throwable t) { android.util.Log.e("WG-Locale",s.get(),t); }
++        }''',
++    'app/morphe/extension/shared/Utils.java': '''
++        package app.morphe.extension.shared;
++        import android.app.Activity;
++        import android.content.Context;
++        import android.content.res.Resources;
++        import android.view.View;
++        import android.view.ViewGroup;
++        import java.util.function.Predicate;
++        public final class Utils {
++          public static Context context; public static Activity activity;
++          public static Context getContext() { return context; }
++          public static Activity getActivity() { return activity; }
++          public static Resources getResources() { return context.getResources(); }
++          public static void setIsDarkModeEnabled(boolean v) {}
++          public static boolean isDarkModeEnabled() { return false; }
++          public static void restartApp(Activity a) { throw new AssertionError("Restart is outside this test"); }
++          @SuppressWarnings("unchecked") public static <T extends View> T getChildView(ViewGroup p, boolean nested, Predicate<View> predicate) {
++            for (int i=0;i<p.getChildCount();i++) { View v=p.getChildAt(i); if(predicate.test(v)) return (T)v;
++              if(nested && v instanceof ViewGroup g) { T result=getChildView(g,true,predicate); if(result!=null)return result; }
++            } return null;
++          }
++          @SuppressWarnings("unchecked") public static <T extends View> T getChildViewByResourceName(ViewGroup p, String name) {
++            return (T)p.findViewById(p.getResources().getIdentifier(name,"id",p.getContext().getPackageName()));
++          }
++        }''',
++    'app/morphe/extension/shared/settings/Setting.java': 'package app.morphe.extension.shared.settings; public class Setting<T> { public String key; }',
++    'app/morphe/extension/shared/settings/AppLanguage.java': 'package app.morphe.extension.shared.settings; public enum AppLanguage { DEFAULT,KO,EN }',
++    'app/morphe/extension/shared/settings/BaseSettings.java': '''
++        package app.morphe.extension.shared.settings;
++        public final class BaseSettings { public static final Language MORPHE_LANGUAGE=new Language();
++          public static final class Language { public AppLanguage value=AppLanguage.DEFAULT; public AppLanguage get(){return value;} }
++        }''',
++    'app/morphe/extension/shared/settings/SharedYouTubeSettings.java': '''
++        package app.morphe.extension.shared.settings;
++        public final class SharedYouTubeSettings { public static final Flag WIREGUARD_ENABLED=new Flag();
++          public static final class Flag { public boolean value; public boolean get(){return value;} public void save(boolean v){value=v;} }
++        }''',
++    'app/morphe/extension/shared/settings/preference/AbstractPreferenceFragment.java': '''
++        package app.morphe.extension.shared.settings.preference;
++        public final class AbstractPreferenceFragment { public static boolean showRestartDialogIfNeeded(android.app.Activity a){return false;} }
++        ''',
++    'app/morphe/extension/shared/settings/preference/ToolbarPreferenceFragment.java': '''
++        package app.morphe.extension.shared.settings.preference;
++        import android.app.Activity; import android.preference.PreferenceFragment; import android.graphics.drawable.Drawable;
++        import android.widget.Toolbar; import android.widget.ImageButton; import android.view.Window;
++        public class ToolbarPreferenceFragment extends PreferenceFragment {
++          public static Drawable getBackButtonDrawable(){return null;}
++          public static void setNavigationBarColor(Window w){}
++          public static void addToolbarButton(Toolbar toolbar,String icon,String description,Runnable click){
++            ImageButton button=new ImageButton(toolbar.getContext());button.setContentDescription(description);
++            button.setOnClickListener(v->click.run());toolbar.addView(button);
++          }
++        }''',
++    'app/morphe/extension/shared/theme/ThemeUtils.java': '''
++        package app.morphe.extension.shared.theme;
++        public final class ThemeUtils { public static int getAppBackgroundColor(){return 0xffffffff;} public static int getAppForegroundColor(){return 0xff000000;} }
++        ''',
++    'app/morphe/extension/shared/ui/Dim.java': 'package app.morphe.extension.shared.ui; public final class Dim { public static int dp16=16; }',
++    'app/morphe/extension/shared/patches/SettingsNamePatch.java': 'package app.morphe.extension.shared.patches; public final class SettingsNamePatch { public static String getSettingsName(){return "Morphe";} }',
++    'app/morphe/extension/shared/wireguard/WireGuardConfigStore.java': '''
++        package app.morphe.extension.shared.wireguard;
++        public final class WireGuardConfigStore { public static boolean present; public static boolean hasProfile(android.content.Context c){return present;} public static void delete(android.content.Context c){present=false;} }
++        ''',
++    'app/morphe/extension/shared/wireguard/WireGuardProxy.java': '''
++        package app.morphe.extension.shared.wireguard;
++        public final class WireGuardProxy {
++          public enum State {DISABLED,NOT_STARTED,READY,BLOCKED}
++          public static State current=State.DISABLED; public static boolean restart;
++          public static State state(){return current;} public static boolean isPatchIncluded(){return true;}
++          public static boolean isRestartRequired(){return restart;} public static void markRestartRequired(){restart=true;}
++        }''',
++    'app/morphe/extension/shared/wireguard/ProfileOperations.java': '''
++        package app.morphe.extension.shared.wireguard;
++        public final class ProfileOperations {
++          public interface Source { java.io.InputStream open() throws java.io.IOException; }
++          public static final class Failure extends Exception { public String resourceKey,validationReasonKey; }
++          public static void importProfile(android.content.Context c,Source source) throws Failure {throw new AssertionError("Import outside test");}
++          public static void validateStoredProfile(android.content.Context c) throws Failure {throw new AssertionError("Validation outside test");}
++        }''',
++    'app/morphe/wireguard/locale/HostActivity.java': 'package app.morphe.wireguard.locale; public final class HostActivity extends android.app.Activity {}',
++    'app/morphe/wireguard/locale/EntryActivity.java': '''
++        package app.morphe.wireguard.locale;
++        public final class EntryActivity extends android.preference.PreferenceActivity {
++          @Override public void onCreate(android.os.Bundle state) { super.onCreate(state);addPreferencesFromResource(getResources().getIdentifier("entry","xml",getPackageName())); }
++        }''',
++}
++
++
++def run(command, **kwargs):
++    subprocess.run(list(map(str, command)), check=True, **kwargs)
++
++
++def main():
++    p = argparse.ArgumentParser(description=__doc__)
++    p.add_argument('--source', required=True, type=Path)
++    p.add_argument('--library', required=True, type=Path, help='morphe-patches-library checkout')
++    p.add_argument('--korean-resources', required=True, type=Path, help='Real custom XML or clearly marked test-only fixture')
++    p.add_argument('--sdk', required=True, type=Path)
++    p.add_argument('--jdk', required=True, type=Path)
++    p.add_argument('--output', required=True, type=Path)
++    p.add_argument('--variant', choices=('baseline', 'fixed'), required=True)
++    p.add_argument('--baseline-commit', help='Read Activity/BaseActivityHook from this Git commit')
++    a = p.parse_args()
++    assert not a.output.exists(), 'Choose a fresh output directory'
++    a.output.mkdir(parents=True, mode=0o700)
++    src = a.output / 'src'; src.mkdir()
++    copied = []
++    def write(name, data, origin):
++        data = data.encode() if isinstance(data, str) else data
++        dest = src / name; dest.parent.mkdir(parents=True, exist_ok=True); dest.write_bytes(data)
++        copied.append({'path': name, 'sha256': hashlib.sha256(data).hexdigest(), 'origin': origin})
++    base = 'extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/'
++    for name in ('wireguard/WireGuardSettingsActivity.java', 'settings/BaseActivityHook.java'):
++        data = (subprocess.check_output(['git', 'show', a.baseline_commit + ':' + base + name], cwd=a.source)
++                if a.baseline_commit else (a.source / base / name).read_bytes())
++        write('app/morphe/extension/shared/' + name, data, ('git:' + a.baseline_commit) if a.baseline_commit else 'current production source')
++    for name in ('StringRef.java', 'ResourceUtils.java', 'ResourceType.java'):
++        data = (a.library / 'extension-library/src/main/java/app/morphe/extension/shared' / name).read_bytes()
++        write('app/morphe/extension/shared/' + name, data, 'exact public extension dependency')
++    for name, text in STUBS.items(): write(name, textwrap.dedent(text).strip() + '\n', 'explicit collaborator stub; not production')
++    write('app/morphe/wireguard/locale/RegressionInstrumentation.java', Path(__file__).with_name('RegressionInstrumentation.java').read_bytes(), 'Android runtime test runner')
++    res = a.output / 'res'; (res / 'values').mkdir(parents=True); (res / 'values-ko').mkdir(); (res / 'layout').mkdir(); (res / 'xml').mkdir()
++    extra = {'morphe_settings_navigate_up', 'morphe_settings_screen_info_title'}
++    locale_tables = {}
++    for origin, folder in ((a.source / 'patches/src/main/resources/addresources/values/shared-youtube/strings.xml', 'values'), (a.korean_resources, 'values-ko')):
++        root = ET.Element('resources')
++        for element in ET.parse(origin).getroot():
++            key = element.get('name', '')
++            if key.startswith('morphe_wireguard_') or key in extra: root.append(element)
++        common = (origin.parent.parent / 'shared/strings.xml' if folder == 'values'
++                  else a.source / 'patches/src/main/resources/addresources/values-ko-rKR/shared/strings.xml')
++        for element in ET.parse(common).getroot():
++            if element.get('name', '') in extra: root.append(element)
++        names = [e.get('name') for e in root]
++        assert len(names) == len(set(names)), 'Duplicate fixture resource names'
++        strings = {e.get('name'): ''.join(e.itertext()) for e in root if e.get('name','').startswith('morphe_wireguard_')}
++        assert len(strings) == 60 and all(v.strip() for v in strings.values()), 'Expected 60 nonempty WireGuard resources'
++        locale_tables[folder] = strings
++        ET.ElementTree(root).write(res / folder / 'strings.xml', encoding='utf-8', xml_declaration=True)
++    assert locale_tables['values'].keys() == locale_tables['values-ko'].keys(), 'English/Korean resource key sets differ'
++    for key in ('morphe_wireguard_import', 'morphe_wireguard_saved_disabled', 'morphe_wireguard_error_invalid_endpoint'):
++        assert locale_tables['values'][key] != locale_tables['values-ko'][key], 'Korean fixture accidentally contains English text: ' + key
++    (res / 'values/styles.xml').write_text('<resources><style name="Theme.YouTube.Settings" parent="android:style/Theme.Material.Light.NoActionBar"/><style name="Theme.YouTube.Settings.Dark" parent="android:style/Theme.Material.NoActionBar"/></resources>')
++    (res / 'layout/morphe_settings_with_toolbar.xml').write_text('''<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent"><FrameLayout android:id="@+id/morphe_toolbar_parent" android:layout_width="match_parent" android:layout_height="wrap_content"><Toolbar android:id="@+id/morphe_toolbar" android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"/></FrameLayout><FrameLayout android:id="@+id/morphe_settings_fragments" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/></LinearLayout>''')
++    (res / 'xml/entry.xml').write_text('''<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"><Preference android:key="wireguard" android:title="@string/morphe_wireguard_settings_title"/></PreferenceScreen>''')
++    package = 'app.morphe.wireguard.locale.' + a.variant
++    manifest = a.output / 'AndroidManifest.xml'
++    manifest.write_text('''<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="'''+package+'''" android:versionCode="1" android:versionName="1"><uses-sdk android:minSdkVersion="26" android:targetSdkVersion="28"/><application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:debuggable="true" android:label="WireGuard locale regression"><activity android:name="app.morphe.wireguard.locale.HostActivity" android:exported="false"/><activity android:name="app.morphe.wireguard.locale.EntryActivity" android:exported="false"/><activity android:name="app.morphe.extension.shared.wireguard.WireGuardSettingsActivity" android:exported="false"/></application><instrumentation android:name="app.morphe.wireguard.locale.RegressionInstrumentation" android:targetPackage="'''+package+'''"/></manifest>''')
++    tools = a.sdk / 'build-tools/36.0.0'; android = a.sdk / 'platforms/android-36/android.jar'
++    classes = a.output / 'classes'; classes.mkdir(); dex = a.output / 'dex'; dex.mkdir()
++    run([a.jdk / 'bin/javac', '--release', '17', '-cp', android, '-d', classes, *sorted(src.rglob('*.java'))])
++    run([a.jdk / 'bin/jar', 'cf', a.output / 'classes.jar', '-C', classes, '.'])
++    run([tools / 'aapt2', 'compile', '--dir', res, '-o', a.output / 'resources.zip'])
++    run([tools / 'aapt2', 'link', '-I', android, '--manifest', manifest, '-o', a.output / 'unsigned.apk', a.output / 'resources.zip'])
++    run([tools / 'd8', '--min-api', '26', '--lib', android, '--output', dex, a.output / 'classes.jar'])
++    with zipfile.ZipFile(a.output / 'unsigned.apk', 'a') as z: z.write(dex / 'classes.dex', 'classes.dex')
++    key = a.output / 'ephemeral-test-only.jks'
++    run([a.jdk / 'bin/keytool', '-genkeypair', '-keystore', key, '-storepass', 'android', '-keypass', 'android', '-alias', 'test', '-keyalg', 'RSA', '-keysize', '2048', '-validity', '2', '-dname', 'CN=Ephemeral Locale Regression Test'])
++    run([tools / 'apksigner', 'sign', '--ks', key, '--ks-pass', 'pass:android', '--out', a.output / 'harness.apk', a.output / 'unsigned.apk'])
++    resources = {str(f.relative_to(res)): hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(res.rglob('*')) if f.is_file()}
++    (a.output / 'build-result.json').write_text(json.dumps({'status':'PASS','variant':a.variant,'package':package,'apk_sha256':hashlib.sha256((a.output/'harness.apk').read_bytes()).hexdigest(),'source_snapshot':copied,'resource_snapshot':resources,'korean_original_sha256':hashlib.sha256(a.korean_resources.read_bytes()).hexdigest(),'scope':'Standalone real Android UI with documented collaborator stubs; not target-app acceptance'},indent=2)+'\n')
++    print('PASS built', a.output / 'harness.apk', flush=True)
++
++
++if __name__ == '__main__': main()
+diff --git a/tests/wireguard-settings-locale/run_harness.py b/tests/wireguard-settings-locale/run_harness.py
+new file mode 100644
+index 000000000..3995ca4da
+--- /dev/null
++++ b/tests/wireguard-settings-locale/run_harness.py
+@@ -0,0 +1,104 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-3.0-only
++# See the included NOTICE file for additional GPLv3 Section 7 requirements.
++"""Run the standalone locale APKs on an explicitly selected disposable emulator.
++
++The caller owns emulator creation/cleanup. Only the two test packages are installed,
++stopped and instrumented. No target-app APK, profile or server is involved.
++"""
++import argparse
++import json
++from pathlib import Path
++import re
++import subprocess
++import time
++import xml.etree.ElementTree as ET
++
++
++def main():
++    p = argparse.ArgumentParser(description=__doc__)
++    p.add_argument('--adb', type=Path, required=True)
++    p.add_argument('--serial', required=True)
++    p.add_argument('--builds', type=Path, required=True)
++    p.add_argument('--output', type=Path, required=True)
++    p.add_argument('--boot-timeout', type=int, default=480)
++    p.add_argument('--case-timeout', type=int, default=120)
++    p.add_argument('--emulator-exit-file', type=Path, help='Optional caller-owned launcher status; abort early if it exits')
++    p.add_argument('--owned-vm-dir', type=Path, help='Optional disposable VM directory for a physical allocation bound')
++    p.add_argument('--max-allocated-bytes', type=int, default=1024**3)
++    p.add_argument('--max-ram-backing-bytes', type=int, default=2*1024**3)
++    a = p.parse_args()
++    assert a.serial.startswith('emulator-'), 'Use a disposable Android emulator'
++    assert not a.output.exists(), 'Choose fresh output directory'
++    a.output.mkdir(parents=True, mode=0o700)
++    report = {'status':'PENDING','scope':'Standalone Android UI regression; target-app/device/network acceptance NOT RUN','serial':a.serial,'cases':[]}
++    def save():
++        (a.output / 'result.json').write_text(json.dumps(report, indent=2, ensure_ascii=False)+'\n')
++    def adb(*args, timeout=30):
++        return subprocess.run([str(a.adb), '-s', a.serial, *args], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=timeout)
++    def health():
++        if a.emulator_exit_file and a.emulator_exit_file.exists():
++            raise RuntimeError('Disposable emulator exited before test completion: '+a.emulator_exit_file.read_text().strip())
++        if a.owned_vm_dir:
++            files=[f for f in a.owned_vm_dir.rglob('*') if not f.is_symlink() and f.is_file()]
++            # The emulator memory-maps guest RAM here even when snapshot saving is off.
++            ram=[f for f in files if f.name == 'ram.img' and f.parent.parent.name == 'snapshots']
++            backing=sum(f.stat().st_blocks*512 for f in ram)
++            allocated=sum(f.stat().st_blocks*512 for f in files if f not in ram)
++            report['vm_disk_allocated_bytes']=allocated
++            report['vm_ram_backing_allocated_bytes']=backing
++            assert allocated <= a.max_allocated_bytes, 'Disposable VM exceeded disk allocation bound'
++            assert backing <= a.max_ram_backing_bytes, 'Disposable VM exceeded guest RAM backing bound'
++    try:
++        start = time.monotonic()
++        while True:
++            health()
++            try:
++                ready = adb('shell', 'getprop', 'sys.boot_completed', timeout=10)
++                report['last_boot_readiness']={'boot_completed':ready.stdout.strip(),'boot_query_exit':ready.returncode}
++                if ready.returncode == 0 and ready.stdout.strip() == '1':
++                    package=adb('shell','pm','path','android',timeout=10)
++                    report['last_boot_readiness'].update(framework_package_exit=package.returncode,framework_package_output=package.stdout.strip()[-1000:])
++                    if package.returncode == 0 and re.search(r'^package:/\S+\.apk\s*$',package.stdout,re.M): break
++            except subprocess.TimeoutExpired:
++                report['last_boot_readiness']={'error':'Timed out checking boot or PackageManager readiness'}
++            assert time.monotonic()-start < a.boot_timeout, 'Disposable emulator boot timeout'
++            time.sleep(8)
++        report['boot_wait_seconds'] = round(time.monotonic()-start, 1)
++        report['android_api'] = adb('shell','getprop','ro.build.version.sdk').stdout.strip()
++        report['android_abi'] = adb('shell','getprop','ro.product.cpu.abi').stdout.strip()
++        try:
++            unlock=adb('shell','wm','dismiss-keyguard',timeout=5)
++            report['keyguard_setup']={'exit_code':unlock.returncode,'output':unlock.stdout.strip()[-500:]}
++        except subprocess.TimeoutExpired:
++            report['keyguard_setup']={'status':'TIMEOUT (nonfatal; test windows also show when locked)'}
++        for variant in ('baseline','fixed'):
++            directory = a.builds / variant
++            build = json.loads((directory/'build-result.json').read_text())
++            assert build['status']=='PASS' and build['variant']==variant
++            package = build['package']; assert package=='app.morphe.wireguard.locale.'+variant
++            # These dedicated disposable test IDs never contain target-app data.
++            adb('uninstall',package)
++            installed=adb('install','--no-incremental','-r',str(directory/'harness.apk'),timeout=90)
++            assert installed.returncode == 0 and 'Success' in installed.stdout, installed.stdout
++            keys = sorted(e.get('name') for e in ET.parse(directory/'res/values/strings.xml').getroot())
++            for scenario in ('activity-ko-cached-en','activity-ko-unprimed','morphe-ko-cached-en','english-fallback'):
++                health()
++                adb('shell','am','force-stop',package)
++                command = ('shell','am','instrument','-w','-r','-e','scenario',scenario,'-e','keys',','.join(keys),package+'/app.morphe.wireguard.locale.RegressionInstrumentation')
++                result = adb(*command,timeout=a.case_timeout)
++                log=a.output/(variant+'-'+scenario+'.txt');log.write_text(result.stdout);log.chmod(0o600)
++                values = dict(re.findall(r'^INSTRUMENTATION_RESULT: (\w+)=(.*)$',result.stdout,re.M))
++                status=values.get('status','MISSING')
++                entry={'variant':variant,'scenario':scenario,'exit_code':result.returncode,'status':status,'checks':int(values.get('checks','0')),'log':str(log),'expected':'FAIL' if variant=='baseline' else 'PASS'}
++                if 'error' in values:entry['error']=values['error']
++                report['cases'].append(entry);save()
++                assert result.returncode==0 and status==entry['expected'], result.stdout[-4000:]
++                assert entry['checks'] >= 30, 'Too few UI checks executed'
++                print(variant,scenario,status,entry['checks'],'checks',flush=True)
++        report['status']='PASS';save();print('PASS expected baseline failures and fixed Android UI cases',flush=True)
++    except BaseException as error:
++        report['status']='FAIL';report['error']=str(error)[-5000:];save();raise
++
++
++if __name__ == '__main__': main()

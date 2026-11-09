@@ -1,7 +1,7 @@
 # Unofficial app-local WireGuard patches for Morphe
 
 **Independent, experimental build. Not affiliated with MorpheApp or Proton.**
-The [v2.1.4 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.4)
+The [v2.1.5 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.5)
 provides app-local WireGuard proxy patches for YouTube and YouTube Music,
 retaining the Morphe Patches v2.1.0 base and its other patches.
 
@@ -20,44 +20,46 @@ The bundle includes the other patches from its upstream base, so choose **one
 patch source per app** instead of combining it with official Morphe patches.
 After updating this source, patch and install the app again to receive changes.
 
-## Changes in v2.1.4
+## Changes in v2.1.5
 
-- Settings and validation explanations use the established Android XML resources,
-  `StringRef` and Morphe language context. The native parser returns 19 fixed
-  diagnostic codes; only known codes select translated resources. Unknown
-  payloads use a generic localized failure without exposing backend text.
-- All 60 WireGuard settings strings have custom translations for Korean,
-  Japanese, simplified Chinese, traditional Chinese, Spanish, French, German
-  and Brazilian Portuguese. Missing translations use the English source text.
-- These translations were added to the custom distribution at the maintainer's
-  request. They are not an official Crowdin export. The upstream contribution
-  retains the English-source/Crowdin translation workflow.
-- The source-built transport, encrypted profile format, key alias, default-off
-  routing policy and supported configuration subset are retained. License and
-  copyright notices remain verbatim.
+- Fix the internal WireGuard settings page resolving strings from a global
+  context/cache while its entry menu used the localized settings context.
+  Titles, preference rows, status text, dialogs and toasts now resolve resources
+  through the WireGuard settings Activity itself.
+- Keep the existing Morphe language context and restart behavior. All 60 strings
+  remain translated for Korean, Japanese, simplified/traditional Chinese,
+  Spanish, French, German and Brazilian Portuguese, with English fallback.
+- Keep the 19 fixed native diagnostic codes, transport, encrypted profile
+  format/key alias, connection default-off policy and patch default selection.
+  License and copyright notices remain verbatim.
 
-The existing [v2.1.3 maintenance fixes](docs/wireguard-maintenance-2.1.3.md),
-including Morphe-style preferences, safer import diagnostics and transport
-cleanup, remain included. Earlier releases are preserved.
+The translations remain custom-distribution additions requested by the
+maintainer, not an official Crowdin export. The upstream contribution retains
+English source resources and the Crowdin translation workflow. Existing
+[v2.1.3 maintenance fixes](docs/wireguard-maintenance-2.1.3.md) and
+[v2.1.4 translations](docs/wireguard-i18n-2.1.4.md) remain included. Earlier
+releases are preserved.
 
 ## Verification status
 
-The i18n preparation cohort passed full source builds, 30 workflow tests per
-source tree, 80 host JNI checks, 37 Python checks and Go race/vet checks. It also
-passed focused APK checks and isolated synthetic Korean resource fixtures.
-Those preparation results do not establish final release artifact verification.
+- Final source build and regression checks: **64 affected Java tests per source tree plus source bundle/DEX/JNI/resource/native checks passed**.
+- Final APK patching/resource inspection: **YouTube 21.30.216 and Music 9.30.53 passed four focused/default Desktop --validate cases; all 2,160 compiled resource values matched**.
+- Standalone Android settings Activity runtime checks:
+  **four pre-fix failures reproduced; four fixed scenarios passed all 124 comparisons on API35/x86_64 KVM, using real Activity/widgets and explicit backend stubs**.
 
-**Final v2.1.4 build, APK and eight-locale checks: 609 Java/Kotlin tests passed, 5 existing APK-dependent skips; 80 host JNI checks and 41 Python tests passed.**
-The four final APK cases and all 2,160 compiled resource value comparisons also passed.
-See the [v2.1.4 localization report](docs/wireguard-i18n-2.1.4.md) for the exact
-artifact identity, test scope and remaining checks.
+The v2.1.4 checks matched 2,160 compiled resource values across four APKs. Those
+checks established resource inclusion and value equality; they did not execute
+the internal screen or prove which context resolved its displayed strings.
+See the [v2.1.5 localization fix report](docs/wireguard-i18n-2.1.5.md) for exact
+artifact identity, regression evidence and the scope of the runtime harness.
 
-**No Android target-app acceptance test has been executed for v2.1.4.** The
-maintainer's successful v2.1.1 device use is a separate historical report.
-Actual text layout, language selection/restart, profile import, AndroidKeyStore,
-remote handshake, playback, DNS/leak behavior, network transitions and concurrent
-app/process use require device testing. APK resource inspection does not prove
-that translated text renders correctly on a device.
+**No Android target-app acceptance test has been executed for v2.1.5.** A
+standalone Android harness with backend collaborators stubbed is separate from
+running the patched YouTube/Music apps. Target-app text layout, language
+selection/restart, profile import, AndroidKeyStore, remote handshake, playback,
+DNS/leak behavior, network transitions and concurrent app/process use require
+further device testing. The maintainer's successful v2.1.1 device use remains a
+separate historical report.
 
 ## Supported scope and limitations
 
@@ -83,17 +85,17 @@ that translated text renders correctly on a device.
 
 ## Source and release files
 
-The [v2.1.4 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.4)
+The [v2.1.5 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.5)
 contains:
 
-- `morphe-wireguard-youtube-music-preview-2.1.4.mpp` — unsigned source-built
-  bundle; SHA-256 `8010b938869104ab8a80f1ca381f624d43d9bee64e434c84287b4648b52816ae`.
+- `morphe-wireguard-youtube-music-preview-2.1.5.mpp` — unsigned source-built
+  bundle; SHA-256 `ec0dc5bce25f795fbcae9c4abfd9a8dc2798e800355f88eb04f308f986998627`.
 - `morphe-wireguard-prototype-source.zip` — full corresponding modified source,
   pinned dependency source snapshots, build instructions and license notices.
 - `RELEASE-SHA256SUMS.txt` — asset checksums.
 
 The review patch is [wireguard-prototype.patch](wireguard-prototype.patch),
-against Morphe v2.1.0. Full source: [`8a87d95`](https://github.com/seo-rii/morphe-patches/commit/8a87d95bf51a90b2206c5fa1b414316b06c539cb) on `feat/wireguard-i18n-custom`.
+against Morphe v2.1.0. Full source commit: `ac1a922bd896160c896764d7535698295fed487a` on `feat/wireguard-i18n-custom`.
 See [source build instructions](docs/wireguard-source-build.md), the source
 ZIP's `README-WIREGUARD.md`, `docs/`, `build-support/` and `scripts/`, and the
 [archive packaging helper](scripts/package-wireguard-source.py).

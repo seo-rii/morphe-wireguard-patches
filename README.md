@@ -1,9 +1,9 @@
 # Unofficial app-local WireGuard patches for Morphe
 
 **Independent, experimental build. Not affiliated with MorpheApp or Proton.**
-The [v2.1.3 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.3)
+The [v2.1.4 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.4)
 provides app-local WireGuard proxy patches for YouTube and YouTube Music,
-based on Morphe Patches v2.1.0. It is built from the complete modified source.
+retaining the Morphe Patches v2.1.0 base and its other patches.
 
 ## Add this source in Morphe
 
@@ -12,113 +12,100 @@ on Android, or navigate to **Morphe → Sources → + → Remote** and enter:
 
 `https://github.com/seo-rii/morphe-wireguard-patches`
 
-This is a standard GitHub release, rather than a pre-release; the WireGuard
-feature remains experimental. **WireGuard proxy (experimental) is selected by
-default for both apps**, including in the Android patch DEX. **WireGuard routing
-itself defaults to off**: import a supported `.conf`, explicitly enable it in
-the patched app, and restart. Each app keeps its own encrypted profile.
+This is a standard GitHub release; the WireGuard feature remains experimental.
+**WireGuard proxy (experimental) is selected by default for both apps. Routing
+itself defaults to off.** Import a supported `.conf`, explicitly enable it in
+each patched app, and restart. Each app keeps its own encrypted profile.
+The bundle includes the other patches from its upstream base, so choose **one
+patch source per app** instead of combining it with official Morphe patches.
+After updating this source, patch and install the app again to receive changes.
 
-The bundle includes the other patches from its upstream base. Choose **one
-patch source per app** instead of combining this source with official Morphe
-patches.
+## Changes in v2.1.4
 
-## Changes in v2.1.3
+- Settings and validation explanations use the established Android XML resources,
+  `StringRef` and Morphe language context. The native parser returns 19 fixed
+  diagnostic codes; only known codes select translated resources. Unknown
+  payloads use a generic localized failure without exposing backend text.
+- All 60 WireGuard settings strings have custom translations for Korean,
+  Japanese, simplified Chinese, traditional Chinese, Spanish, French, German
+  and Brazilian Portuguese. Missing translations use the English source text.
+- These translations were added to the custom distribution at the maintainer's
+  request. They are not an official Crowdin export. The upstream contribution
+  retains the English-source/Crowdin translation workflow.
+- The source-built transport, encrypted profile format, key alias, default-off
+  routing policy and supported configuration subset are retained. License and
+  copyright notices remain verbatim.
 
-- WireGuard settings reuse Morphe themes, toolbar and preference rows, with a
-  confirmation and restart step for the enable switch.
-- Import errors distinguish document access, UTF-8, file size, unsupported
-  configuration, native loading, and secure storage. Native validation reasons
-  contain no profile values, document addresses or keys.
-- Standard `PersistentKeepalive = off` and numeric `Address`/`AllowedIPs` without
-  CIDR masks are accepted. A bare route denotes one host (`/32` or `/128`).
-- Maintenance fixes abort truncated plain HTTP responses, stop peers before
-  closing the native device, recover committed profile backups, and improve
-  cleanup after proxy startup failures.
-- Both native ABIs, extensions and Android patch DEX are built through Gradle
-  from source. The v2.1.3 build does not modify an older release's bytecode.
-
-The encrypted profile format and key alias are retained. Existing releases and
-their historical [default-selection correction](docs/wireguard-default-verification.md)
-remain available.
+The existing [v2.1.3 maintenance fixes](docs/wireguard-maintenance-2.1.3.md),
+including Morphe-style preferences, safer import diagnostics and transport
+cleanup, remain included. Earlier releases are preserved.
 
 ## Verification status
 
-The maintainer reported successful practical use of **v2.1.1** on a physical
-Android device on 2026-11-07. That report is separate from v2.1.3 verification.
-**No new Android target-app acceptance test was executed for v2.1.3.**
+The i18n preparation cohort passed full source builds, 30 workflow tests per
+source tree, 80 host JNI checks, 37 Python checks and Go race/vet checks. It also
+passed focused APK checks and isolated synthetic Korean resource fixtures.
+Those preparation results do not establish final release artifact verification.
 
-For this release, the full source build passed with **603 tests passed and 5
-existing APK-dependent tests skipped**. That total includes the 24 new
-import-workflow tests. Separate checks passed: 42 host JNI checks, 33 Python
-checks, and Go race/vet checks.
-YouTube **21.30.216** and Music **9.30.53** each passed Morphe Desktop
-`--validate` with the WireGuard-only and full default selections. These four
-cases cover host patching and static APK inspection, not app launch or traffic.
+**Final v2.1.4 build, APK and eight-locale checks: 609 Java/Kotlin tests passed, 5 existing APK-dependent skips; 80 host JNI checks and 41 Python tests passed.**
+The four final APK cases and all 2,160 compiled resource value comparisons also passed.
+See the [v2.1.4 localization report](docs/wireguard-i18n-2.1.4.md) for the exact
+artifact identity, test scope and remaining checks.
 
-See the [maintenance report](docs/wireguard-maintenance-2.1.3.md) for the exact
-scope, source/bundle identity and remaining device checks.
+**No Android target-app acceptance test has been executed for v2.1.4.** The
+maintainer's successful v2.1.1 device use is a separate historical report.
+Actual text layout, language selection/restart, profile import, AndroidKeyStore,
+remote handshake, playback, DNS/leak behavior, network transitions and concurrent
+app/process use require device testing. APK resource inspection does not prove
+that translated text renders correctly on a device.
 
 ## Supported scope and limitations
 
-- This is an authenticated app-local HTTP proxy using a userspace TCP/IP stack
-  and WireGuard. It does not register Android `VpnService`, use root, require a
-  separate WireGuard app, or occupy the system VPN slot.
-- Only requests intercepted by the patched network paths are tunneled. Other
-  app requests, Cast, WebView and separate processes are not guaranteed to be
-  covered. This is **not a system-wide VPN or complete kill switch**.
-- `arm64-v8a` and `x86_64` are supported. APKs containing 32-bit ABIs and root
-  mount installation are unsupported.
-- WireGuard requires YouTube 20.47.62 or newer among the bundle's declared
-  targets. Music uses its declared target list. Compatibility metadata is
-  separate from the tested versions listed above.
-- Profiles must be UTF-8 text of at most 64 KiB with one interface and one peer,
-  a numeric endpoint IP, and numeric DNS servers covered by `AllowedIPs` and a
-  configured address family. Endpoint hostnames, DNS search domains, shell
-  hooks and routing-table options remain unsupported.
-- Intercepted requests have no direct fallback when WireGuard fails. Local
-  proxy readiness does not prove a server handshake or Internet access.
-- The reported import failure on another user's setup has not been reproduced
-  on that device. The syntax fixes and clearer diagnostics do not establish
-  that every reported import problem is resolved.
-
-The bundle is unsigned. Android profile import, AndroidKeyStore integration,
-server handshake, playback, DNS/traffic leak behavior, network transitions,
-restart behavior and concurrent app use still need device acceptance testing.
+- The authenticated app-local HTTP proxy uses a userspace TCP/IP stack and
+  WireGuard. It does not register `VpnService`, use root, require a separate
+  WireGuard app, or occupy the system VPN slot.
+- Only intercepted network paths are tunneled. Other app requests, WebView,
+  Cast and separate processes are not guaranteed to be covered. This is **not
+  a system-wide VPN or complete kill switch**.
+- Supported APK ABIs: `arm64-v8a` and `x86_64`. APKs containing 32-bit ABIs and
+  root-mount installation are unsupported.
+- WireGuard requires YouTube 20.47.62 or newer among the declared targets.
+  Compatibility metadata is separate from executed APK/device tests.
+- Profiles require one interface/peer, UTF-8 text of at most 64 KiB, a numeric
+  endpoint and numeric DNS covered by `AllowedIPs` and an interface address
+  family. Hostname endpoints, DNS search domains, shell hooks and routing-table
+  options remain unsupported.
+- Intercepted requests have no direct fallback on tunnel failure. Local proxy
+  readiness does not prove a remote handshake or Internet access.
+- The previously reported import failure has not been reproduced on the
+  reporting user's device; localized diagnostics do not prove every such
+  failure is resolved.
 
 ## Source and release files
 
-The [v2.1.3 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.3)
+The [v2.1.4 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.4)
 contains:
 
-- `morphe-wireguard-youtube-music-preview-2.1.3.mpp` — source-built patch bundle,
-  SHA-256 `557463a7dd755857d81742f998e34b654010c75dc1de830e713c0b8fc569b25d`.
+- `morphe-wireguard-youtube-music-preview-2.1.4.mpp` — unsigned source-built
+  bundle; SHA-256 `8010b938869104ab8a80f1ca381f624d43d9bee64e434c84287b4648b52816ae`.
 - `morphe-wireguard-prototype-source.zip` — full corresponding modified source,
   pinned dependency source snapshots, build instructions and license notices.
-- `RELEASE-SHA256SUMS.txt` — release asset checksums.
+- `RELEASE-SHA256SUMS.txt` — asset checksums.
 
-[`wireguard-prototype.patch`](wireguard-prototype.patch) contains the changes
-against Morphe v2.1.0. The full project source is also pinned at
-[`b13c6c88a`](https://github.com/seo-rii/morphe-patches/tree/b13c6c88a40835ba81f1b44510fd0878fade4b4d).
-See [source build instructions](docs/wireguard-source-build.md)
-and the source ZIP's `README-WIREGUARD.md`, `docs/`, `build-support/` and
-`scripts/`. The historical repair script is retained for v2.1.2 provenance;
-v2.1.3 uses its `verify` operation only.
+The review patch is [wireguard-prototype.patch](wireguard-prototype.patch),
+against Morphe v2.1.0. Full source: [`8a87d95`](https://github.com/seo-rii/morphe-patches/commit/8a87d95bf51a90b2206c5fa1b414316b06c539cb) on `feat/wireguard-i18n-custom`.
+See [source build instructions](docs/wireguard-source-build.md), the source
+ZIP's `README-WIREGUARD.md`, `docs/`, `build-support/` and `scripts/`, and the
+[archive packaging helper](scripts/package-wireguard-source.py).
+The historical v2.1.2 `repair` operation is not part of this source build.
 
 ## License and provenance
 
 This is a modified, unofficial derivative of
 [MorpheApp/morphe-patches](https://github.com/MorpheApp/morphe-patches)
 at `8fa2c7a1a832498de8f179748998a3ca87e198eb`.
-The original [GPL-3.0 license](LICENSE) and mandatory [NOTICE](NOTICE) are
-preserved. Dependency versions and copyright/license notices are included in
-the source ZIP and patch bundle; the patched app exposes them in WireGuard
-settings. Proprietary target APKs, personal profiles, private keys, account
-credentials and signing secrets are not distributed.
-
-Source archive assembly is reproducible with the tracked
-[packaging helper](scripts/package-wireguard-source.py), using the frozen clean
-source commit, four pinned dependency checkouts and tested bundle. Its `prepare`
-step stages dependency sources and its `package` step records per-file hashes.
-The ZIP includes provenance manifests; no target app APKs or credentials are
-distributed. Required dependency-owned AOSP framework/test APK resources are
-retained with ARSCLib source and licensing.
+Original [GPL-3.0 LICENSE](LICENSE), [NOTICE](NOTICE), dependency licenses and
+copyright notices are preserved. The app exposes bundled notices in WireGuard
+settings. No proprietary target APKs, personal profiles, private keys, account
+credentials or signing secrets are distributed. Dependency-owned AOSP framework
+and test APK resources required by ARSCLib are retained with its source/license.

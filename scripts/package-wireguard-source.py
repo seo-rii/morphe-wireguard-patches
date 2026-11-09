@@ -12,8 +12,8 @@ import tempfile
 import zipfile
 
 BASE = '8fa2c7a1a832498de8f179748998a3ca87e198eb'
-VERSION = '2.1.3'
-DATE = (2026, 11, 8, 0, 0, 0)
+VERSION = '2.1.4'
+DATE = (2026, 11, 9, 0, 0, 0)
 PINS = {
     'morphe-patches-gradle-plugin': '5b7e4619931a8c78b7858e598e002222d37021b9',
     'morphe-patches-library': '11f8c7e4d9dd64e18b0594d2c7cbf09176a65327',
@@ -140,8 +140,8 @@ def package(args):
     rows = copy_git(args.source, args.stage / 'morphe-wireguard')
     for name in ('LICENSE', 'NOTICE'):
         assert git(args.source, 'show', BASE + ':' + name) == (args.source / name).read_bytes(), name
-    assert b'version = 2.1.3' in (args.source / 'gradle.properties').read_bytes()
-    assert (args.stage / 'morphe-wireguard/docs/wireguard-maintenance-2.1.3.md').is_file(), 'Missing final validation report'
+    assert b'version = 2.1.4' in (args.source / 'gradle.properties').read_bytes()
+    assert (args.stage / 'morphe-wireguard/docs/wireguard-i18n-2.1.4.md').is_file(), 'Missing final validation report'
     native = {}
     with zipfile.ZipFile(args.bundle) as z:
         assert z.testzip() is None

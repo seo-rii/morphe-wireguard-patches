@@ -12,10 +12,10 @@ index 058cb3b9b..34343181c 100644
  # Local configuration file (sdk path, etc.)
 diff --git a/README-WIREGUARD.md b/README-WIREGUARD.md
 new file mode 100644
-index 000000000..74d73d9e1
+index 000000000..d95d4f240
 --- /dev/null
 +++ b/README-WIREGUARD.md
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,120 @@
 +# App-local WireGuard preview — 비공식 Morphe 수정본
 +
 +Morphe Patches v2.1.0에 YouTube와 YouTube Music용 앱 내부 WireGuard 프록시를
@@ -25,15 +25,27 @@ index 000000000..74d73d9e1
 +백포팅했으며 최신 upstream 전체를 덮어쓰지 않았습니다.
 +
 +관리자는 v2.1.1을 실제 Android 기기에서 잘 사용했다고 확인했습니다(2026-11-07).
-+이 경험과 v2.1.3 자동화 검증은 구분합니다. 새 UI의 기기 화면 확인, 실제 서버
++이 경험과 v2.1.4 자동화 검증은 구분합니다. 새 UI의 기기 화면 확인, 실제 서버
 +handshake, 재생, DNS 경로 및 Wi-Fi/모바일 전환은 새로 실행한 것으로 간주하지
-+않습니다. [이번 변경 및 검증 기록](docs/wireguard-maintenance-2.1.3.md)과
++않습니다. [이번 변경 및 검증 기록](docs/wireguard-i18n-2.1.4.md)과
 +[기기 검증 절차](docs/wireguard-device-acceptance.md)를 참고하세요.
 +
-+## v2.1.3 변경
++## v2.1.4 변경
++
++- 한국어·일본어·중국어 간체/번체·스페인어·프랑스어·독일어·브라질 포르투갈어의
++  WireGuard 설정 및 오류 문자열 60개를 추가했습니다. 다른 Morphe 설정과 같은
++  Android 리소스와 앱 언어 설정을 사용하며, 언어 변경에는 기존 재시작 규칙이 적용됩니다.
++- 네이티브 검증 오류 19개를 고정 코드로 전달하고 Java에서 허용된 리소스 키로만
++  변환하여 번역합니다. 알 수 없거나 이전 형식인 오류는 일반 오류로 표시하며
++  원시 백엔드 메시지나 프로필 값을 화면에 노출하지 않습니다.
++- 이 번역은 관리자가 요청한 커스텀 배포판용 추가입니다. 공식 기여 브랜치는
++  영어 원문 및 Crowdin 번역 정책을 유지하며 이 번역 파일을 포함하지 않습니다.
++- 암호화된 프로필 형식·키 별칭·전송 구조와 아래의 v2.1.3 수정 사항을 유지합니다.
++
++## 유지된 v2.1.3 수정
 +
 +- 가져오기 실패를 파일 접근·UTF-8/크기·설정 검증·엔진 로딩·암호화 저장 단계로
-+  구분하고, 프로필 값이 없는 정제된 네이티브 검증 사유를 표시합니다.
++  구분합니다. v2.1.4에서는 네이티브 검증 사유도 리소스로 번역합니다.
 +- `PersistentKeepalive = off`와 CIDR을 생략한 숫자 `Address`·`AllowedIPs`를
 +  지원합니다. 생략한 경로는 IPv4 `/32`, IPv6 `/128`인 단일 호스트 경로입니다.
 +- 다른 Morphe 설정 페이지와 같은 테마·툴바·Preference 행과 활성화 스위치를
@@ -102,11 +114,11 @@ index 000000000..74d73d9e1
 +네이티브 payload는 Gradle의 `processResources` 전에 소스에서 자동으로 만듭니다.
 +Go 1.26.10, Android NDK 28.2.13676358, API 26이 필요합니다. 산출물은
 +`native/wireguard/build/android/<abi>/libmorphewireguard.so`와
-+`patches/build/libs/patches-2.1.3.mpp`입니다.
++`patches/build/libs/patches-2.1.4.mpp`입니다.
 +
 +최종 번들 생성 뒤 JVM/Android DEX 기본 선택을 모두 확인합니다.
 +`scripts/set-wireguard-defaults.py verify`는 검사용으로만 사용할 수 있습니다.
-+역사적인 v2.1.2 재패키징용 `repair`는 v2.1.3 빌드 경로가 아닙니다.
++역사적인 v2.1.2 재패키징용 `repair`는 v2.1.4 빌드 경로가 아닙니다.
 +
 +[네이티브 설명](native/wireguard/README.md)에 프로필 문법, Go/JNI 테스트 및
 +실패 정책을, [기기 체크리스트](docs/wireguard-device-acceptance.md)에 **예상 결과**와
@@ -126,13 +138,13 @@ index 000000000..74d73d9e1
 +YouTube APK, SDK/도구체인, 계정·개인키·실제 프로필은 배포하지 않습니다.
 diff --git a/build-support/PUBLIC_SOURCE_BUILD.md b/build-support/PUBLIC_SOURCE_BUILD.md
 new file mode 100644
-index 000000000..029551efa
+index 000000000..70da6ecab
 --- /dev/null
 +++ b/build-support/PUBLIC_SOURCE_BUILD.md
 @@ -0,0 +1,148 @@
 +# Building the unofficial WireGuard bundle from source
 +
-+The v2.1.3 source retains Morphe Patches v2.1.0 at
++The v2.1.4 source retains Morphe Patches v2.1.0 at
 +`8fa2c7a1a832498de8f179748998a3ca87e198eb`. Only the WireGuard maintenance
 +changes from the contribution branch are backported. Existing unrelated patch
 +sources and their dependency declarations are preserved.
@@ -251,7 +263,7 @@ index 000000000..029551efa
 +Use actual paths for the bundle and installed Android SDK/NDK:
 +
 +```sh
-+wireguard_bundle=patches/build/libs/patches-2.1.3.mpp
++wireguard_bundle=patches/build/libs/patches-2.1.4.mpp
 +python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 +python3 scripts/verify-wireguard-bundle.py "$wireguard_bundle" \
 +  --dexdump "$ANDROID_HOME/build-tools/36.0.0/dexdump"
@@ -270,14 +282,14 @@ index 000000000..029551efa
 +not establish app launch, profile import, remote handshake, playback, DNS path,
 +network handoff, or complete app coverage.
 +
-+[Maintenance validation](../docs/wireguard-maintenance-2.1.3.md) records the
++[Maintenance validation](../docs/wireguard-i18n-2.1.4.md) records the
 +commands actually executed and their limits. Historical v2.1.0/v2.1.2 reports
 +remain in `docs/` and do not stand in for this release's checks. For device
 +checks use [the acceptance checklist](../docs/wireguard-device-acceptance.md).
 +The checksums for the published release are in `RELEASE-SHA256SUMS.txt` in the
 +custom repository/release. Byte equality across other operating systems or NDK
 +host packages is not claimed. Do not run the historical artifact `repair`
-+subcommand to create v2.1.3; all release inputs come from this source build.
++subcommand to create v2.1.4; all release inputs come from this source build.
 diff --git a/build-support/public-plugin-optional-auth.patch b/build-support/public-plugin-optional-auth.patch
 new file mode 100644
 index 000000000..916c97d53
@@ -671,6 +683,236 @@ index 000000000..52ad8f416
 +For every executed item, retain the configuration category (no secrets), observed
 +behavior, pass/fail, device/build identifiers and redacted evidence. Unexecuted
 +items remain **NOT YET RUN**, including after a successful patch bundle build.
+diff --git a/docs/wireguard-i18n-2.1.4.md b/docs/wireguard-i18n-2.1.4.md
+new file mode 100644
+index 000000000..9cb162629
+--- /dev/null
++++ b/docs/wireguard-i18n-2.1.4.md
+@@ -0,0 +1,170 @@
++# WireGuard v2.1.4 localization and validation
++
++This custom distribution retains Morphe Patches v2.1.0 at
++`8fa2c7a1a832498de8f179748998a3ca87e198eb`. The upstream contribution uses a
++separate base and is validated separately. Its results are not additional
++custom-distribution test cases.
++
++## Localization change
++
++The shared settings use the same Android XML resource group, `StringRef` and
++Morphe language context as other patches. The Go parser supplies 19 fixed
++machine codes through the existing JNI exception. Java maps only recognized
++codes to resource keys. Unknown, null, legacy-English or malformed payloads use
++the generic localized validation failure; arbitrary backend messages, provider
++URIs and profile values are not displayed.
++
++No separate language selector, runtime translation service or translation
++network request is introduced. The existing restart semantics apply because
++Morphe caches resolved strings. English remains the default resource fallback.
++
++All 60 WireGuard UI strings are translated in these custom resource variants:
++
++| Language | Source folder suffix | APK resource configuration |
++| --- | --- | --- |
++| Korean | `ko-rKR` | `ko` |
++| Japanese | `ja-rJP` | `ja` |
++| Chinese, simplified | `zh-rCN` | `zh-rCN` |
++| Chinese, traditional | `zh-rTW` | `zh-rTW` |
++| Spanish | `es-rES` | `es` |
++| French | `fr-rFR` | `fr` |
++| German | `de-rDE` | `de` |
++| Portuguese, Brazil | `pt-rBR` | `pt-rBR` |
++
++The maintainer explicitly requested these additions for the custom distribution.
++They are not an official Crowdin export. The official contribution continues
++with English-source changes and Crowdin-managed translations; no translated
++upstream locale files are changed by this work. Existing non-WireGuard
++translations are retained. Protocol field identifiers and numeric limits remain
++unchanged in the localized explanations. License/copyright notices stay verbatim.
++
++The transport and supported configuration subset are retained. Routing still
++defaults to off and profile import alone does not enable it. The encrypted
++profile format/key alias and both patches' default selection policy are retained.
++
++## Final artifact identity
++
++| Item | Value |
++| --- | --- |
++| Bundle | `morphe-wireguard-youtube-music-preview-2.1.4.mpp` |
++| Bundle SHA-256 | `8010b938869104ab8a80f1ca381f624d43d9bee64e434c84287b4648b52816ae` |
++| Release code commit | `5621188ad422f6f6bacf2387aa5b924704926c7f` |
++| Original source base | `8fa2c7a1a832498de8f179748998a3ca87e198eb` |
++| Native ABIs | `arm64-v8a`, `x86_64` |
++| Native minimum Android API | 26 |
++| Tools | Wrapper Gradle 9.8.2, JDK 21, SDK/Build-Tools 36, Go 1.26.10, NDK 28.2.13676358 |
++
++## Preparation checks already executed
++
++The following checks cover the stable-code/resource integration **before the
++final eight-language translated release build**. They are retained as a separate
++cohort and must not be presented as final v2.1.4 artifact evidence.
++
++| Check | Custom preparation result |
++| --- | --- |
++| Full Java/Kotlin source graph | 614 cases: 609 passed, 5 existing APK-dependent cases skipped, no failures/errors |
++| Import workflow/privacy suite | 30 passed, included in the JUnit total |
++| Host JNI | 80 checks passed, including all 19 native diagnostic codes |
++| Native Go race/vet | Passed; 27 top-level tests |
++| Python verification tools | 37 passed, including native/Java/XML/Crowdin contract checks |
++| Focused Desktop `--validate` and APK inspection | YouTube 21.30.216 and Music 9.30.53 passed |
++| Isolated synthetic Korean fixture | Korean marker inclusion and English fallback passed; fixture was not a real translation or released asset |
++
++The counterpart contribution preparation had 1,487 cases: 1,482 passed and 5
++existing APK-dependent skips. Its native/JNI/workflow checks and separate APK
++fixtures also passed. These do not replace the custom build's checks.
++
++## Final v2.1.4 release checks
++
++| Check | Final result |
++| --- | --- |
++| Full Java/Kotlin source graph | 614 cases: 609 passed, 5 existing APK-dependent cases skipped, no failures/errors |
++| Import workflow/privacy | 30 passed, included in JUnit total |
++| Host JNI | 80 checks passed; existing signatures and constructor retained |
++| Python verification tools | 41 passed, including 4 compiled-locale verifier regressions |
++| String resources | Gradle `checkStringResources` passed |
++| Android source bundle / real Morphe loader | Passed; 202 patches, two default-selected WireGuard patches, app-specific dependencies |
++| DEX/JNI/resources/native inspection | Passed; both app classes, extension DEX and three JNI signatures |
++| Go race/vet | 27 top-level tests passed in the preparation cohort; executable native sources are unchanged |
++
++The final build used release code commit `5621188ad422f6f6bacf2387aa5b924704926c7f`.
++Only Markdown documentation was finalized afterward; executable source, resource,
++version, dependency and build inputs remain byte-identical to the tested state.
++The source ZIP's `SOURCE-PROVENANCE.json` records the final documentation commit.
++No compiled defaults were patched. The first result-collection attempt also
++matched an older development bundle; selecting the exact version fixed collection
++without changing inputs or rerunning the successful build steps.
++
++| Packaged native ABI | SHA-256 | Bytes |
++| --- | --- | --- |
++| arm64-v8a | `7d9d7056db514834f64db3fd054eb7b2afefe2b8ef62a4292140fe2d24ecdf48` | 10,093,736 |
++| x86_64 | `949f1d596c0363228c5338b82b5282cdecf00e8a18e61a0492f5639fdba67383` | 10,805,288 |
++
++| App / version | Selection | Desktop `--validate` / static inspection | Patched unsigned APK SHA-256 |
++| --- | --- | --- | --- |
++| YouTube 21.30.216 | focused | Passed | `7f991a08bf2ca72abb5dbde6a1d8d52b298b819c25e05a06ccd4f514921566ec` |
++| YouTube 21.30.216 | defaults | Passed | `e21a1bfd405d3cb42c429722ef7f188c5ccc70f46d06fd76cac9f704baaed9aa` |
++| Music 9.30.53 | focused | Passed | `3b6220e88683c0b40fca3d32c3c8aea842e3baa86fd6903c27e67975cf26cb16` |
++| Music 9.30.53 | defaults | Passed | `b37039d29f4d57f089e9676323c8024bcc4e072abc866700eee32584139b0125` |
++
++Morphe Desktop 2.1.1 performed the four host patch/validation cases without a
++compatibility force flag. Each final APK passed DEX, resource, native payload,
++ELF alignment, manifest and notice inspection. The compiled-locale checker
++matched **all 60 English values and all 60 values in each of the eight real
++locale configurations for every APK: 2,160 value comparisons, all passed**.
++No synthetic marker translation is present in the release.
++
++The signed Google originals passed signature allowlists and ZIP CRC checks.
++YouTube's universal input was explicitly derived into an unsigned arm64-only
++fixture; retained entry contents and package/version identity were checked.
++Music used the original arm64 input. These derived/patched APKs are private test
++artifacts, not release assets. Only arm64 target APKs were exercised in this
++release matrix; x86_64 native payload inspection is not x86_64 app execution.
++
++- Original YouTube SHA-256: `3775a15129dcc4e5b80fc17b7e0841b7fdd1ca89a6e72baa798806f666c74d02`.
++- Original Music SHA-256: `1fe8d535ae445265c7250ed76a24c340e1dc89f2ab5d265f755800fe23ad334e`.
++
++
++The final artifact checks below use the production locale files and compiled APK
++values. The earlier synthetic fixture remains separate evidence and is not
++included in the release. Unavailable device checks remain marked as unrun.
++
++All APK patching/inspection results are host checks. Original APK signatures
++must be verified and derived ABI-only fixtures explicitly identified; no
++proprietary target APK is distributed with this release. Source builds do not
++repair an older bundle's compiled bytecode.
++
++## Not executed
++
++- Actual Android target-app settings rendering, text wrapping, font/glyph layout,
++  language selection/restart and translated error-dialog display.
++- Document-picker URI grants, profile import, AndroidKeyStore availability and
++  encryption behavior on a real target device.
++- Real server handshake, video/music playback, DNS/traffic leak measurements,
++  failed-server recovery, Wi-Fi/mobile handoff and concurrent app/process use.
++- Reproduction of the previously reported import failure on that user's device.
++- A fresh full minimum/latest-experimental app-version/device matrix.
++
++The maintainer's successful physical-device use of v2.1.1 is historical and
++separate from this release. The existing
++[device acceptance checklist](wireguard-device-acceptance.md) contains expected
++results for unrun checks; those expectations are not verification results.
++
++## Security and distribution boundaries
++
++Only intercepted requests use the authenticated app-local HTTP proxy and
++userspace WireGuard stack. Intercepted requests have no direct fallback on
++failure. Local listener readiness is not a remote handshake or Internet-access
++check. The patch does not register Android `VpnService`, use root or provide a
++complete system kill switch. Unhooked traffic and other processes remain outside
++the coverage claim.
++
++Supported profiles still require one peer, a numeric endpoint, explicit numeric
++DNS covered by `AllowedIPs` and an interface address family, and a supported
++64-bit APK. Root mounting, 32-bit ABIs, hostname endpoints, shell hooks and DNS
++search domains remain unsupported. No live provider profile, private key or
++signing credential was used for localization testing or included in assets.
++
++Original GPL-3.0/NOTICE terms, dependency sources/licenses and legal notices are
++retained. See [source build instructions](wireguard-source-build.md) and the
++historical [v2.1.3 maintenance report](wireguard-maintenance-2.1.3.md).
+diff --git a/docs/wireguard-i18n.md b/docs/wireguard-i18n.md
+new file mode 100644
+index 000000000..2685b91ee
+--- /dev/null
++++ b/docs/wireguard-i18n.md
+@@ -0,0 +1,48 @@
++# WireGuard settings localization
++
++WireGuard uses the existing `shared-youtube` Android resource group, `StringRef`
++and `BaseActivityHook` language context. It adds no separate locale selector or
++runtime translation service. Labels and validation details follow the same
++Morphe language/restart behavior as other settings pages.
++
++The Go parser returns one of 19 stable diagnostic codes through the existing JNI
++exception. Java maps only known codes to English XML resource keys, and the
++Activity resolves those keys through `str(...)`. Unknown, legacy or malformed
++payloads use the localized generic validation failure; raw backend text is never
++shown. Go's value-free English `Error()` remains available to non-UI diagnostics.
++
++Crowdin already maps the entire English shared-youtube file to
++`values-%android_code%/shared-youtube/strings.xml`. No Crowdin YAML or resource
++registration change is needed. Korean source resources use `values-ko-rKR` and
++are copied into the target APK's `values-ko` configuration.
++
++The custom v2.1.4 distribution contains 60 English WireGuard strings plus
++complete manual translations for Korean, Japanese, simplified/traditional
++Chinese, Spanish, French, German and Brazilian Portuguese. These custom-only
++locale edits were explicitly authorized by the distributor. The official
++contribution keeps English source edits and Crowdin-managed locale files.
++Existing non-WireGuard translations are preserved. No official Crowdin upload
++or translation write was performed.
++
++Host validation includes all-code Go/JNI checks, workflow privacy/fallback tests,
++and a cross-language native/Java/XML contract check. An isolated test bundle
++simulates Crowdin Korean output with explicit test markers; APK inspection checks
++Korean inclusion and the default English fallback. This fixture is not a real
++translation and must not be published.
++
++The custom release also verifies the real production translations against actual
++compiled APK resources. Run the following after patching the target APKs:
++
++```sh
++python3 scripts/verify-wireguard-locales.py patches/build/libs/patches-2.1.4.mpp \
++  --aapt2 "$ANDROID_HOME/build-tools/36.0.0/aapt2" \
++  --apk /path/to/patched-youtube.apk --apk /path/to/patched-music.apk \
++  --output /path/to/compiled-locales.json
++```
++
++The checker compares all 60 values in the default configuration and each of the
++eight locale configurations. It rejects a missing locale rather than accepting
++English fallback as evidence of translation. This verifies compiled values;
++Android rendering and language switching remain device checks. See the
++[v2.1.4 release record](wireguard-i18n-2.1.4.md) for results. Published v2.1.3
++assets and its corresponding source remain unchanged.
 diff --git a/docs/wireguard-maintenance-2.1.3.md b/docs/wireguard-maintenance-2.1.3.md
 new file mode 100644
 index 000000000..f5de8b600
@@ -1029,13 +1271,13 @@ index 000000000..feda96617
 +treating the preview as reliable. This is not a system-wide VPN or kill switch.
 diff --git a/docs/wireguard-source-build.md b/docs/wireguard-source-build.md
 new file mode 100644
-index 000000000..478ffb31f
+index 000000000..6190b6e94
 --- /dev/null
 +++ b/docs/wireguard-source-build.md
 @@ -0,0 +1,148 @@
 +# Building the unofficial WireGuard bundle from source
 +
-+The v2.1.3 source retains Morphe Patches v2.1.0 at
++The v2.1.4 source retains Morphe Patches v2.1.0 at
 +`8fa2c7a1a832498de8f179748998a3ca87e198eb`. Only the WireGuard maintenance
 +changes from the contribution branch are backported. Existing unrelated patch
 +sources and their dependency declarations are preserved.
@@ -1154,7 +1396,7 @@ index 000000000..478ffb31f
 +Use actual paths for the bundle and installed Android SDK/NDK:
 +
 +```sh
-+wireguard_bundle=patches/build/libs/patches-2.1.3.mpp
++wireguard_bundle=patches/build/libs/patches-2.1.4.mpp
 +python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 +python3 scripts/verify-wireguard-bundle.py "$wireguard_bundle" \
 +  --dexdump "$ANDROID_HOME/build-tools/36.0.0/dexdump"
@@ -1173,14 +1415,14 @@ index 000000000..478ffb31f
 +not establish app launch, profile import, remote handshake, playback, DNS path,
 +network handoff, or complete app coverage.
 +
-+[Maintenance validation](wireguard-maintenance-2.1.3.md) records the
++[Maintenance validation](wireguard-i18n-2.1.4.md) records the
 +commands actually executed and their limits. Historical v2.1.0/v2.1.2 reports
 +remain in `docs/` and do not stand in for this release's checks. For device
 +checks use [the acceptance checklist](wireguard-device-acceptance.md).
 +The checksums for the published release are in `RELEASE-SHA256SUMS.txt` in the
 +custom repository/release. Byte equality across other operating systems or NDK
 +host packages is not claimed. Do not run the historical artifact `repair`
-+subcommand to create v2.1.3; all release inputs come from this source build.
++subcommand to create v2.1.4; all release inputs come from this source build.
 diff --git a/docs/wireguard-verification.md b/docs/wireguard-verification.md
 new file mode 100644
 index 000000000..dd8c3c1f8
@@ -1872,7 +2114,7 @@ index 000000000..bc53f47ff
 +}
 diff --git a/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/NativeTunnel.java b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/NativeTunnel.java
 new file mode 100644
-index 000000000..e7366b65c
+index 000000000..d66ce5241
 --- /dev/null
 +++ b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/NativeTunnel.java
 @@ -0,0 +1,32 @@
@@ -1901,19 +2143,19 @@ index 000000000..e7366b65c
 +    /** Checks a profile without making network connections or executing configuration hooks. */
 +    public static native void validate(String config);
 +
-+    /** JNI validation supplies fixed diagnostic text, never profile values or parser causes. */
++    /** JNI validation supplies stable diagnostic codes, never profile values or parser causes. */
 +    public static final class InvalidProfileException extends IllegalArgumentException {
-+        public InvalidProfileException(String message) {
-+            super(message);
++        public InvalidProfileException(String code) {
++            super(code);
 +        }
 +    }
 +}
 diff --git a/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/ProfileOperations.java b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/ProfileOperations.java
 new file mode 100644
-index 000000000..75b649741
+index 000000000..282079272
 --- /dev/null
 +++ b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/ProfileOperations.java
-@@ -0,0 +1,87 @@
+@@ -0,0 +1,114 @@
 +// SPDX-License-Identifier: GPL-3.0-only
 +// See the included NOTICE file for additional GPLv3 Section 7 requirements.
 +
@@ -1940,13 +2182,13 @@ index 000000000..75b649741
 +    static final class Failure extends Exception {
 +        final String resourceKey;
 +        @Nullable
-+        final String validationReason;
++        final String validationReasonKey;
 +
-+        Failure(String resourceKey, @Nullable String validationReason) {
++        Failure(String resourceKey, @Nullable String validationReasonKey) {
 +            // Do not retain the original exception: provider/storage causes can contain secrets.
 +            super(resourceKey);
 +            this.resourceKey = resourceKey;
-+            this.validationReason = validationReason;
++            this.validationReasonKey = validationReasonKey;
 +        }
 +    }
 +
@@ -1990,8 +2232,8 @@ index 000000000..75b649741
 +        try {
 +            NativeTunnel.validate(config);
 +        } catch (NativeTunnel.InvalidProfileException ex) {
-+            // Only this JNI exception contains the native parser's fixed, sanitized diagnostics.
-+            throw new Failure("morphe_wireguard_validation_failed", ex.getMessage());
++            // Native codes select known resources; never show arbitrary backend messages.
++            throw new Failure("morphe_wireguard_validation_failed", validationReasonKey(ex.getMessage()));
 +        } catch (LinkageError ex) {
 +            // Includes the first failed load and later attempts in the same app process.
 +            throw new Failure("morphe_wireguard_native_failed", null);
@@ -1999,6 +2241,33 @@ index 000000000..75b649741
 +            // Conversion errors and unknown backend errors must not expose arbitrary messages.
 +            throw new Failure("morphe_wireguard_validation_failed", null);
 +        }
++    }
++
++    @Nullable
++    private static String validationReasonKey(@Nullable String code) {
++        if (code == null) return null;
++        return switch (code) {
++            case "invalid_text" -> "morphe_wireguard_error_invalid_text";
++            case "invalid_interface" -> "morphe_wireguard_error_invalid_interface";
++            case "invalid_peer" -> "morphe_wireguard_error_invalid_peer";
++            case "unsupported_section" -> "morphe_wireguard_error_unsupported_section";
++            case "invalid_directive" -> "morphe_wireguard_error_invalid_directive";
++            case "duplicate_directive" -> "morphe_wireguard_error_duplicate_directive";
++            case "invalid_address" -> "morphe_wireguard_error_invalid_address";
++            case "duplicate_address" -> "morphe_wireguard_error_duplicate_address";
++            case "invalid_dns" -> "morphe_wireguard_error_invalid_dns";
++            case "invalid_mtu" -> "morphe_wireguard_error_invalid_mtu";
++            case "invalid_endpoint" -> "morphe_wireguard_error_invalid_endpoint";
++            case "invalid_routes" -> "morphe_wireguard_error_invalid_routes";
++            case "unsupported_directive" -> "morphe_wireguard_error_unsupported_directive";
++            case "invalid_value" -> "morphe_wireguard_error_invalid_value";
++            case "line_too_long" -> "morphe_wireguard_error_line_too_long";
++            case "missing_required" -> "morphe_wireguard_error_missing_required";
++            case "ipv6_mtu" -> "morphe_wireguard_error_ipv6_mtu";
++            case "dns_required" -> "morphe_wireguard_error_dns_required";
++            case "dns_not_routed" -> "morphe_wireguard_error_dns_not_routed";
++            default -> null;
++        };
 +    }
 +}
 diff --git a/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/WireGuardConfigStore.java b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/WireGuardConfigStore.java
@@ -2387,7 +2656,7 @@ index 000000000..ac341e412
 +}
 diff --git a/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/WireGuardSettingsActivity.java b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/WireGuardSettingsActivity.java
 new file mode 100644
-index 000000000..f84208f9e
+index 000000000..d8dc9228d
 --- /dev/null
 +++ b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard/WireGuardSettingsActivity.java
 @@ -0,0 +1,437 @@
@@ -2630,16 +2899,16 @@ index 000000000..f84208f9e
 +                refreshState();
 +                if (succeeded) success.run();
 +                else if (profileFailure != null) {
-+                    showProfileFailure(profileFailure.resourceKey, profileFailure.validationReason);
++                    showProfileFailure(profileFailure.resourceKey, profileFailure.validationReasonKey);
 +                } else toast(failureKey);
 +            });
 +        });
 +    }
 +
-+    private void showProfileFailure(String resourceKey, @Nullable String validationReason) {
++    private void showProfileFailure(String resourceKey, @Nullable String validationReasonKey) {
 +        String message = str(resourceKey);
-+        if (validationReason != null && !validationReason.isEmpty()) {
-+            message += "\n\n" + validationReason;
++        if (validationReasonKey != null && !validationReasonKey.isEmpty()) {
++            message += "\n\n" + str(validationReasonKey);
 +        }
 +        new AlertDialog.Builder(this)
 +                .setTitle(str("morphe_wireguard_profile_error_title"))
@@ -3413,10 +3682,10 @@ index 000000000..e41ba600d
 +}
 diff --git a/extensions/shared-youtube/library/src/test/java/app/morphe/extension/shared/wireguard/ProfileOperationsBoundaryTest.java b/extensions/shared-youtube/library/src/test/java/app/morphe/extension/shared/wireguard/ProfileOperationsBoundaryTest.java
 new file mode 100644
-index 000000000..7623a723c
+index 000000000..fc04f8998
 --- /dev/null
 +++ b/extensions/shared-youtube/library/src/test/java/app/morphe/extension/shared/wireguard/ProfileOperationsBoundaryTest.java
-@@ -0,0 +1,315 @@
+@@ -0,0 +1,357 @@
 +// SPDX-License-Identifier: GPL-3.0-only
 +// See the included NOTICE file for additional GPLv3 Section 7 requirements.
 +
@@ -3444,7 +3713,8 @@ index 000000000..7623a723c
 +                public class ImportProbe {
 +                    public static final String ORIGINAL = "previous-public-test-profile";
 +                    public static final String PRIVATE_MARKER = "synthetic-private-value-not-a-real-key";
-+                    public static final String REASON = "Exactly one [Peer] after [Interface] is supported.";
++                    public static final String REASON = "invalid_peer";
++                    public static final String REASON_KEY = "morphe_wireguard_error_invalid_peer";
 +                    public static final List<String> events = new ArrayList<>();
 +                    public static String saved = ORIGINAL, expected;
 +                    public static int nativeLoads, validations, saves, loads;
@@ -3536,8 +3806,14 @@ index 000000000..7623a723c
 +    @Test public void emptyDocumentHasContentDiagnosticBeforeNativeLoad() throws Throwable { run("empty"); }
 +    @Test public void blankDocumentHasContentDiagnosticBeforeNativeLoad() throws Throwable { run("blank"); }
 +    @Test public void embeddedNulHasContentDiagnosticBeforeNativeLoad() throws Throwable { run("nul"); }
-+    @Test public void typedNativeReasonIsShownWithoutRetainingCause() throws Throwable { run("typedValidation"); }
++    @Test public void typedNativeCodeSelectsResourceKeyWithoutRetainingCause() throws Throwable { run("typedValidation"); }
 +    @Test public void untrustedNativeArgumentMessageIsNotShownOrRetained() throws Throwable { run("argumentValidation"); }
++    @Test public void everyKnownNativeCodeSelectsATranslatableResource() throws Throwable { run("knownCodes"); }
++    @Test public void unknownNativeCodeFallsBackWithoutRawText() throws Throwable { run("unknownTyped"); }
++    @Test public void nullNativeCodeFallsBackWithoutRawText() throws Throwable { run("nullTyped"); }
++    @Test public void legacyEnglishNativeMessageIsNotDisplayed() throws Throwable { run("legacyTyped"); }
++    @Test public void privateNativeMessageIsNotDisplayedOrRetained() throws Throwable { run("privateTyped"); }
++    @Test public void nativePayloadCannotChooseAnArbitraryResource() throws Throwable { run("resourceTyped"); }
 +    @Test public void missingNativeLibraryAndPoisonedClassHaveSameNativeDiagnostic() throws Throwable { run("nativeMissing"); }
 +    @Test public void storageIoFailureKeepsPreviousProfileAndHasStorageDiagnostic() throws Throwable { run("storeIo"); }
 +    @Test public void keyStoreFailureKeepsPreviousProfileAndHasStorageDiagnostic() throws Throwable { run("storeSecurity"); }
@@ -3574,13 +3850,13 @@ index 000000000..7623a723c
 +                        throw new AssertionError("Expected profile operation failure");
 +                    } catch (ProfileOperations.Failure error) {
 +                        check(error.resourceKey.equals("morphe_wireguard_" + key), "Wrong diagnostic stage");
-+                        check(Objects.equals(error.validationReason, reason), "Wrong validation detail");
++                        check(Objects.equals(error.validationReasonKey, reason), "Wrong validation detail");
 +                        check(error.getCause() == null, "Failure retained private cause");
 +                        check(error.getSuppressed().length == 0, "Failure retained suppressed cause");
 +                        StringWriter output = new StringWriter();
 +                        error.printStackTrace(new PrintWriter(output));
 +                        check(!output.toString().contains(ImportProbe.PRIVATE_MARKER), "Diagnostic leaked profile data");
-+                        check(!String.valueOf(error.validationReason).contains(ImportProbe.PRIVATE_MARKER),
++                        check(!String.valueOf(error.validationReasonKey).contains(ImportProbe.PRIVATE_MARKER),
 +                                "Validation detail leaked profile data");
 +                    }
 +                }
@@ -3662,8 +3938,43 @@ index 000000000..7623a723c
 +                        ImportProbe.validationFailure = reason == null
 +                                ? new IllegalArgumentException(ImportProbe.PRIVATE_MARKER)
 +                                : new NativeTunnel.InvalidProfileException(reason);
-+                        reject("validation_failed", reason, () -> importText(PROFILE));
++                        reject("validation_failed", reason == null ? null : ImportProbe.REASON_KEY,
++                                () -> importText(PROFILE));
 +                        check(ImportProbe.validations == 1 && ImportProbe.saves == 0, "Invalid profile reached storage");
++                        check(ImportProbe.saved.equals(ImportProbe.ORIGINAL), "Previous profile changed");
++                        return;
++                    }
++                    if (scenario.equals("knownCodes")) {
++                        String[] codes = {"invalid_text", "invalid_interface", "invalid_peer", "unsupported_section",
++                                "invalid_directive", "duplicate_directive", "invalid_address", "duplicate_address",
++                                "invalid_dns", "invalid_mtu", "invalid_endpoint", "invalid_routes", "unsupported_directive",
++                                "invalid_value", "line_too_long", "missing_required", "ipv6_mtu", "dns_required", "dns_not_routed"};
++                        for (String code : codes) {
++                            ImportProbe.validations = 0;
++                            ImportProbe.closed = false;
++                            ImportProbe.validationFailure = new NativeTunnel.InvalidProfileException(code);
++                            reject("validation_failed", "morphe_wireguard_error_" + code, () -> importText(PROFILE));
++                            check(ImportProbe.validations == 1 && ImportProbe.saves == 0,
++                                    "Native validation failure reached storage");
++                            check(ImportProbe.closed, "Validation failure did not close the document");
++                            check(ImportProbe.saved.equals(ImportProbe.ORIGINAL), "Previous profile changed");
++                        }
++                        return;
++                    }
++                    if (List.of("unknownTyped", "nullTyped", "legacyTyped", "privateTyped", "resourceTyped")
++                            .contains(scenario)) {
++                        String payload = switch (scenario) {
++                            case "unknownTyped" -> "future_unknown_code";
++                            case "nullTyped" -> null;
++                            case "legacyTyped" -> "Exactly one [Peer] after [Interface] is supported.";
++                            case "privateTyped" -> ImportProbe.PRIVATE_MARKER;
++                            default -> "morphe_wireguard_error_invalid_peer";
++                        };
++                        ImportProbe.validationFailure = new NativeTunnel.InvalidProfileException(payload);
++                        reject("validation_failed", null, () -> importText(PROFILE));
++                        check(ImportProbe.validations == 1 && ImportProbe.saves == 0,
++                                "Unknown native payload reached storage");
++                        check(ImportProbe.closed, "Unknown native payload did not close the document");
 +                        check(ImportProbe.saved.equals(ImportProbe.ORIGINAL), "Previous profile changed");
 +                        return;
 +                    }
@@ -4192,7 +4503,7 @@ index 0cde5caa1..152043b35 100644
      }
  }
 diff --git a/gradle.properties b/gradle.properties
-index 78ed265f3..4f4cdac22 100644
+index 78ed265f3..b3693e1ec 100644
 --- a/gradle.properties
 +++ b/gradle.properties
 @@ -5,4 +5,4 @@ android.useAndroidX = true
@@ -4200,7 +4511,7 @@ index 78ed265f3..4f4cdac22 100644
  # Extensions are Java only. Prevents adding the Kotlin stdlib.
  kotlin.stdlib.default.dependency = false
 -version = 2.1.0
-+version = 2.1.3
++version = 2.1.4
 diff --git a/native/wireguard/.gitignore b/native/wireguard/.gitignore
 new file mode 100644
 index 000000000..79d701b89
@@ -4213,7 +4524,7 @@ index 000000000..79d701b89
 +__pycache__/
 diff --git a/native/wireguard/README.md b/native/wireguard/README.md
 new file mode 100644
-index 000000000..8bb7a6a7f
+index 000000000..03c4bfef7
 --- /dev/null
 +++ b/native/wireguard/README.md
 @@ -0,0 +1,183 @@
@@ -4377,7 +4688,7 @@ index 000000000..8bb7a6a7f
 +a device test; successful in-memory tests and cross-compilation do not prove it.
 +
 +The commands above document how to run the tests. The
-+[maintenance validation report](../../docs/wireguard-maintenance-2.1.3.md) records what
++[maintenance validation report](../../docs/wireguard-i18n-2.1.4.md) records what
 +was actually executed separately from device expectations.
 +
 +## Dependencies and licenses
@@ -4586,10 +4897,10 @@ index 000000000..e5258a839
 +}
 diff --git a/native/wireguard/cmd/jni/main.go b/native/wireguard/cmd/jni/main.go
 new file mode 100644
-index 000000000..a9ecff582
+index 000000000..094ff221e
 --- /dev/null
 +++ b/native/wireguard/cmd/jni/main.go
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,74 @@
 +//go:build android || jni
 +
 +// SPDX-License-Identifier: GPL-3.0-only
@@ -4653,8 +4964,12 @@ index 000000000..a9ecff582
 +//export morphe_wg_validate
 +func morphe_wg_validate(config *C.char) *C.char {
 +	if err := wg.Validate(C.GoString(config)); err != nil {
-+		// Validate only returns deliberately sanitized ConfigError messages.
-+		return C.CString(err.Error())
++		// The Java UI maps only known codes to localized resources.
++		var configErr *wg.ConfigError
++		if errors.As(err, &configErr) {
++			return C.CString(configErr.Code)
++		}
++		return C.CString("invalid_config")
 +	}
 +	return nil
 +}
@@ -4662,10 +4977,10 @@ index 000000000..a9ecff582
 +func main() {}
 diff --git a/native/wireguard/config.go b/native/wireguard/config.go
 new file mode 100644
-index 000000000..b600e1817
+index 000000000..8e23df668
 --- /dev/null
 +++ b/native/wireguard/config.go
-@@ -0,0 +1,287 @@
+@@ -0,0 +1,290 @@
 +// SPDX-License-Identifier: GPL-3.0-only
 +
 +// Package wireguard provides an app-local, fail-closed WireGuard HTTP proxy.
@@ -4692,13 +5007,16 @@ index 000000000..b600e1817
 +	maxRoutes      = 256
 +)
 +
-+// ConfigError intentionally contains no config values, key material, or file
-+// contents. It is safe to display to the user, unlike arbitrary parser errors.
-+type ConfigError struct{ Reason string }
++// ConfigError contains a stable localization code and a value-free diagnostic.
++// JNI returns Code; Error keeps the English diagnostic for non-UI callers.
++type ConfigError struct {
++	Code   string
++	Reason string
++}
 +
 +func (e *ConfigError) Error() string { return e.Reason }
 +
-+func invalid(reason string) error { return &ConfigError{Reason: reason} }
++func invalid(code, reason string) error { return &ConfigError{Code: code, Reason: reason} }
 +
 +type config struct {
 +	privateKey [32]byte
@@ -4726,7 +5044,7 @@ index 000000000..b600e1817
 +
 +func parseConfig(text string) (_ *config, resultErr error) {
 +	if len(text) == 0 || len(text) > MaxConfigBytes || !utf8.ValidString(text) || strings.ContainsRune(text, '\x00') {
-+		return nil, invalid("Configuration must be valid UTF-8 text of at most 64 KiB.")
++		return nil, invalid("invalid_text", "Configuration must be valid UTF-8 text of at most 64 KiB.")
 +	}
 +	text = strings.TrimPrefix(text, "\ufeff")
 +	c := &config{mtu: 1420}
@@ -4752,28 +5070,28 @@ index 000000000..b600e1817
 +			switch strings.ToLower(line) {
 +			case "[interface]":
 +				if interfaceSeen || peerSeen {
-+					return nil, invalid("Exactly one [Interface], followed by one [Peer], is supported.")
++					return nil, invalid("invalid_interface", "Exactly one [Interface], followed by one [Peer], is supported.")
 +				}
 +				interfaceSeen, section = true, "interface"
 +			case "[peer]":
 +				if !interfaceSeen || peerSeen {
-+					return nil, invalid("Exactly one [Peer] after [Interface] is supported.")
++					return nil, invalid("invalid_peer", "Exactly one [Peer] after [Interface] is supported.")
 +				}
 +				peerSeen, section = true, "peer"
 +			default:
-+				return nil, invalid("Configuration contains an unsupported section.")
++				return nil, invalid("unsupported_section", "Configuration contains an unsupported section.")
 +			}
 +			continue
 +		}
 +		key, value, ok := strings.Cut(line, "=")
 +		key, value = strings.ToLower(strings.TrimSpace(key)), strings.TrimSpace(value)
 +		if !ok || section == "" || value == "" {
-+			return nil, invalid("Configuration contains an invalid or empty directive.")
++			return nil, invalid("invalid_directive", "Configuration contains an invalid or empty directive.")
 +		}
 +		fullKey := section + "." + key
 +		multi := fullKey == "interface.address" || fullKey == "interface.dns" || fullKey == "peer.allowedips"
 +		if seen[fullKey] && !multi {
-+			return nil, invalid("Duplicate singleton directives are not supported.")
++			return nil, invalid("duplicate_directive", "Duplicate singleton directives are not supported.")
 +		}
 +		seen[fullKey] = true
 +		var err error
@@ -4784,11 +5102,11 @@ index 000000000..b600e1817
 +			for _, item := range strings.Split(value, ",") {
 +				p, parseErr := parsePrefix(strings.TrimSpace(item))
 +				if parseErr != nil || !isUnicast(p.Addr()) || len(c.addresses) >= maxAddresses {
-+					return nil, invalid("Address must contain at most 8 unicast IPv4/IPv6 addresses with optional CIDR masks.")
++					return nil, invalid("invalid_address", "Address must contain at most 8 unicast IPv4/IPv6 addresses with optional CIDR masks.")
 +				}
 +				addr := p.Addr().Unmap()
 +				if containsAddr(c.addresses, addr) {
-+					return nil, invalid("Duplicate interface addresses are not supported.")
++					return nil, invalid("duplicate_address", "Duplicate interface addresses are not supported.")
 +				}
 +				c.addresses = append(c.addresses, addr)
 +			}
@@ -4796,7 +5114,7 @@ index 000000000..b600e1817
 +			for _, item := range strings.Split(value, ",") {
 +				addr, parseErr := netip.ParseAddr(strings.TrimSpace(item))
 +				if parseErr != nil || !isUnicast(addr) || len(c.dns) >= maxDNS {
-+					return nil, invalid("DNS must contain at most 8 numeric unicast IP addresses; search domains are unsupported.")
++					return nil, invalid("invalid_dns", "DNS must contain at most 8 numeric unicast IP addresses; search domains are unsupported.")
 +				}
 +				addr = addr.Unmap()
 +				if !containsAddr(c.dns, addr) {
@@ -4808,7 +5126,7 @@ index 000000000..b600e1817
 +		case "interface.mtu":
 +			c.mtu, err = strconv.Atoi(value)
 +			if err != nil || c.mtu < 576 || c.mtu > 9000 {
-+				return nil, invalid("MTU must be between 576 and 9000 bytes.")
++				return nil, invalid("invalid_mtu", "MTU must be between 576 and 9000 bytes.")
 +			}
 +		case "peer.publickey":
 +			c.publicKey, err = parseKey(value, false)
@@ -4818,14 +5136,14 @@ index 000000000..b600e1817
 +		case "peer.endpoint":
 +			c.endpoint, err = netip.ParseAddrPort(value)
 +			if err != nil || !isUnicast(c.endpoint.Addr()) || c.endpoint.Port() == 0 {
-+				return nil, invalid("Endpoint must be numeric IPv4:port or [IPv6]:port. Hostnames are unsupported in this version.")
++				return nil, invalid("invalid_endpoint", "Endpoint must be numeric IPv4:port or [IPv6]:port. Hostnames are unsupported in this version.")
 +			}
 +			c.endpoint = netip.AddrPortFrom(c.endpoint.Addr().Unmap(), c.endpoint.Port())
 +		case "peer.allowedips":
 +			for _, item := range strings.Split(value, ",") {
 +				p, parseErr := parsePrefix(strings.TrimSpace(item))
 +				if parseErr != nil || p.Addr().Zone() != "" || p.Addr().Is4In6() || len(c.routes) >= maxRoutes {
-+					return nil, invalid("AllowedIPs must contain at most 256 valid IPv4/IPv6 addresses or CIDR routes.")
++					return nil, invalid("invalid_routes", "AllowedIPs must contain at most 256 valid IPv4/IPv6 addresses or CIDR routes.")
 +				}
 +				c.routes = append(c.routes, p.Masked())
 +			}
@@ -4838,29 +5156,29 @@ index 000000000..b600e1817
 +		default:
 +			// In particular: do not execute PreUp/PostUp/PreDown/PostDown;
 +			// do not silently ignore Table, FwMark, SaveConfig or Amnezia keys.
-+			return nil, invalid("Unsupported directive. Shell hooks, routing-table options, and non-WireGuard extensions are not accepted.")
++			return nil, invalid("unsupported_directive", "Unsupported directive. Shell hooks, routing-table options, and non-WireGuard extensions are not accepted.")
 +		}
 +		if err != nil {
-+			return nil, invalid("A key or numeric configuration value is invalid.")
++			return nil, invalid("invalid_value", "A key or numeric configuration value is invalid.")
 +		}
 +	}
 +	if scanner.Err() != nil {
-+		return nil, invalid("Configuration contains a line longer than 4 KiB.")
++		return nil, invalid("line_too_long", "Configuration contains a line longer than 4 KiB.")
 +	}
 +	if !interfaceSeen || !peerSeen || !seen["interface.privatekey"] || !seen["peer.publickey"] || !seen["peer.endpoint"] || len(c.addresses) == 0 || len(c.routes) == 0 {
-+		return nil, invalid("PrivateKey, Address, PublicKey, Endpoint and AllowedIPs are required.")
++		return nil, invalid("missing_required", "PrivateKey, Address, PublicKey, Endpoint and AllowedIPs are required.")
 +	}
 +	for _, addr := range c.addresses {
 +		if addr.Is6() && c.mtu < 1280 {
-+			return nil, invalid("IPv6 requires an MTU of at least 1280 bytes.")
++			return nil, invalid("ipv6_mtu", "IPv6 requires an MTU of at least 1280 bytes.")
 +		}
 +	}
 +	if len(c.dns) == 0 {
-+		return nil, invalid("At least one DNS server is required; system DNS fallback is disabled.")
++		return nil, invalid("dns_required", "At least one DNS server is required; system DNS fallback is disabled.")
 +	}
 +	for _, addr := range c.dns {
 +		if !c.hasFamily(addr) || !c.allows(addr) {
-+			return nil, invalid("Every DNS server must have a configured address family and be covered by AllowedIPs.")
++			return nil, invalid("dns_not_routed", "Every DNS server must have a configured address family and be covered by AllowedIPs.")
 +		}
 +	}
 +	return c, nil
@@ -4955,16 +5273,17 @@ index 000000000..b600e1817
 +}
 diff --git a/native/wireguard/config_test.go b/native/wireguard/config_test.go
 new file mode 100644
-index 000000000..e7b736b55
+index 000000000..7846010fc
 --- /dev/null
 +++ b/native/wireguard/config_test.go
-@@ -0,0 +1,174 @@
+@@ -0,0 +1,218 @@
 +// SPDX-License-Identifier: GPL-3.0-only
 +
 +package wireguard
 +
 +import (
 +	"encoding/base64"
++	"errors"
 +	"net/netip"
 +	"strings"
 +	"testing"
@@ -5106,6 +5425,49 @@ index 000000000..e7b736b55
 +			}
 +			if strings.Contains(err.Error(), "touch") || strings.Contains(err.Error(), "AQIDBA") || strings.Contains(err.Error(), "vpn.example") {
 +				t.Fatal("validation error leaked a config value")
++			}
++		})
++	}
++}
++
++func TestValidationErrorsHaveStableLocalizationCodes(t *testing.T) {
++	config := fixtureConfig()
++	cases := map[string]string{
++		"invalid_text":          config + "\x00",
++		"invalid_interface":     "[Interface]\n" + config,
++		"invalid_peer":          config + "[Peer]\n",
++		"unsupported_section":   strings.Replace(config, "[Interface]", "[Other]", 1),
++		"invalid_directive":     "[Interface]\nPrivateKey = \n",
++		"duplicate_directive":   strings.Replace(config, "[Peer]", "MTU = 1420\nMTU = 1420\n[Peer]", 1),
++		"invalid_address":       strings.Replace(config, "Address = 10.77.0.2/32", "Address = client.invalid", 1),
++		"duplicate_address":     strings.Replace(config, "Address = 10.77.0.2/32", "Address = 10.77.0.2/32, 10.77.0.2/32", 1),
++		"invalid_dns":           strings.Replace(config, "DNS = 10.77.0.1", "DNS = dns.invalid", 1),
++		"invalid_mtu":           strings.Replace(config, "[Peer]", "MTU = 0\n[Peer]", 1),
++		"invalid_endpoint":      strings.Replace(config, "127.0.0.1:51820", "vpn.example:51820", 1),
++		"invalid_routes":        strings.Replace(config, "10.77.0.0/24", "10.77.0.0/33", 1),
++		"unsupported_directive": strings.Replace(config, "[Peer]", "PostUp = secret-hook-marker\n[Peer]", 1),
++		"invalid_value":         strings.Replace(config, "PrivateKey = ", "PrivateKey = BAD", 1),
++		"line_too_long":         config + strings.Repeat("#", maxConfigLine+1),
++		"missing_required":      strings.Replace(config, "PublicKey = ", "# PublicKey = ", 1),
++		"ipv6_mtu": strings.NewReplacer("Address = 10.77.0.2/32", "Address = 10.77.0.2/32, fd00:77::2/128",
++			"[Peer]", "MTU = 1200\n[Peer]").Replace(config),
++		"dns_required":   strings.Replace(config, "DNS = 10.77.0.1\n", "", 1),
++		"dns_not_routed": strings.Replace(config, "DNS = 10.77.0.1", "DNS = 1.1.1.1", 1),
++	}
++	for code, text := range cases {
++		t.Run(code, func(t *testing.T) {
++			err := Validate(text)
++			var configErr *ConfigError
++			if !errors.As(err, &configErr) || configErr.Code != code {
++				t.Fatalf("expected localization code %q, got %v", code, err)
++			}
++			if configErr.Reason == "" || err.Error() != configErr.Reason || configErr.Reason == code {
++				t.Fatal("non-UI diagnostic was lost")
++			}
++			for _, marker := range []string{"secret-hook-marker", "AQIDBA", "vpn.example", "client.invalid", "dns.invalid"} {
++				if strings.Contains(configErr.Code, marker) || strings.Contains(configErr.Reason, marker) {
++					t.Fatal("validation diagnostic contains profile data")
++				}
 +			}
 +		})
 +	}
@@ -8330,11 +8692,574 @@ index 000000000..76d7bd5bc
 +        installWireGuardRuntime(PreferenceScreen.MISC)
 +    }
 +}
+diff --git a/patches/src/main/resources/addresources/values-de-rDE/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-de-rDE/shared-youtube/strings.xml
+index 857143a9e..fd437543a 100644
+--- a/patches/src/main/resources/addresources/values-de-rDE/shared-youtube/strings.xml
++++ b/patches/src/main/resources/addresources/values-de-rDE/shared-youtube/strings.xml
+@@ -316,4 +316,65 @@ Die ID des Videos, das du dir ansiehst, wird an die Return YouTube Dislike-API g
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">Keine Client-Ratenbegrenzungen festgestellt</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">Client-Ratenbegrenzung %s-mal encountered</string>
+   <string name="morphe_ryd_statistics_millisecond_text">%s Millisekunden</string>
++  <!-- misc.wireguard.wireGuardProxyPatch: custom distribution translations -->
++  <string name="morphe_wireguard_settings_title">WireGuard-Proxy</string>
++  <string name="morphe_wireguard_settings_summary">WireGuard-Profil für einen app-internen Proxy ohne System-VPN importieren</string>
++  <string name="morphe_wireguard_enabled_title">WireGuard-Proxy verwenden</string>
++  <string name="morphe_wireguard_status_title">Aktuelles Routing</string>
++  <string name="morphe_wireguard_intro">Leitet unterstützte App-Anfragen über ein importiertes WireGuard-Profil. Erfordert genau einen Peer, einen numerischen IP-Endpoint und einen durch AllowedIPs abgedeckten DNS-Server. Es wird kein System-VPN erstellt. Dies ist kein Kill-Switch für das Betriebssystem; Anfragen außerhalb der gepatchten Netzwerkpfade sind nicht abgedeckt. Bei aktivierter Funktion ist QUIC deaktiviert.</string>
++  <string name="morphe_wireguard_profile_present">Auf diesem Gerät ist ein verschlüsseltes Profil gespeichert.</string>
++  <string name="morphe_wireguard_profile_missing">Es wurde noch kein WireGuard-Profil importiert.</string>
++  <string name="morphe_wireguard_state_disabled">Aktueller Prozess: WireGuard-Routing ist deaktiviert.</string>
++  <string name="morphe_wireguard_state_pending">Aktueller Prozess: aktiviert; der lokale Proxy startet bei der ersten unterstützten Netzwerkanfrage.</string>
++  <string name="morphe_wireguard_state_ready">Aktueller Prozess: lokaler Proxy bereit. Handshake mit dem Gegenserver und Internetzugang wurden nicht geprüft.</string>
++  <string name="morphe_wireguard_state_blocked">Aktueller Prozess: WireGuard konnte nicht starten. Abgefangene Anfragen werden ohne Ausweichen auf eine direkte Verbindung blockiert.</string>
++  <string name="morphe_wireguard_saved_enabled">Gespeicherter Modus für den nächsten App-Start: aktiviert.</string>
++  <string name="morphe_wireguard_saved_disabled">Gespeicherter Modus für den nächsten App-Start: deaktiviert.</string>
++  <string name="morphe_wireguard_restart_needed">Starte die App neu, um Änderungen anzuwenden. Bestehende Netzwerk-Engines behalten ihr aktuelles Routing bis zum Neustart.</string>
++  <string name="morphe_wireguard_import">.conf-Datei importieren</string>
++  <string name="morphe_wireguard_enable">Aktivieren und neu starten</string>
++  <string name="morphe_wireguard_disable">Deaktivieren und neu starten</string>
++  <string name="morphe_wireguard_remove">Profil entfernen</string>
++  <string name="morphe_wireguard_restart">App neu starten</string>
++  <string name="morphe_wireguard_busy">Wird bearbeitet…</string>
++  <string name="morphe_wireguard_imported">Profil gespeichert. Der Import allein aktiviert das Routing nicht. Starte die App neu, um ein ersetztes Profil zu verwenden.</string>
++  <string name="morphe_wireguard_import_failed">Der Profilvorgang konnte nicht abgeschlossen werden. Versuche es erneut.</string>
++  <string name="morphe_wireguard_profile_error_title">Profilvorgang fehlgeschlagen</string>
++  <string name="morphe_wireguard_import_read_failed">Das ausgewählte Dokument konnte nicht gelesen werden. Wähle eine zugängliche WireGuard-.conf-Datei und versuche es erneut.</string>
++  <string name="morphe_wireguard_import_too_large">Das Profil überschreitet 64 KiB. Wähle eine kleinere WireGuard-.conf-Datei.</string>
++  <string name="morphe_wireguard_import_encoding_failed">Das Profil ist kein gültiger UTF-8-Text. Speichere die WireGuard-.conf-Datei als UTF-8 und versuche es erneut.</string>
++  <string name="morphe_wireguard_import_invalid_text">Das Profil ist leer oder enthält ungültigen Text. Wähle eine WireGuard-.conf-Datei im Textformat.</string>
++  <string name="morphe_wireguard_validation_failed">Dieses Profil wird vom app-internen WireGuard-Proxy nicht unterstützt.</string>
++  <string name="morphe_wireguard_error_invalid_text">Die Konfiguration muss gültiger UTF-8-Text mit höchstens 64 KiB sein.</string>
++  <string name="morphe_wireguard_error_invalid_interface">Es wird genau ein Abschnitt [Interface], gefolgt von genau einem Abschnitt [Peer], unterstützt.</string>
++  <string name="morphe_wireguard_error_invalid_peer">Nach [Interface] wird genau ein Abschnitt [Peer] unterstützt.</string>
++  <string name="morphe_wireguard_error_unsupported_section">Die Konfiguration enthält einen nicht unterstützten Abschnitt.</string>
++  <string name="morphe_wireguard_error_invalid_directive">Die Konfiguration enthält eine ungültige oder leere Anweisung.</string>
++  <string name="morphe_wireguard_error_duplicate_directive">Anweisungen, die nur einmal vorkommen dürfen, dürfen nicht doppelt angegeben werden.</string>
++  <string name="morphe_wireguard_error_invalid_address">Address darf höchstens 8 Unicast-Adressen für IPv4/IPv6 mit optionalen CIDR-Masken enthalten.</string>
++  <string name="morphe_wireguard_error_duplicate_address">Doppelte Schnittstellenadressen werden nicht unterstützt.</string>
++  <string name="morphe_wireguard_error_invalid_dns">DNS darf höchstens 8 numerische Unicast-IP-Adressen enthalten; Suchdomänen werden nicht unterstützt.</string>
++  <string name="morphe_wireguard_error_invalid_mtu">MTU muss zwischen 576 und 9000 Byte liegen.</string>
++  <string name="morphe_wireguard_error_invalid_endpoint">Endpoint muss eine numerische Adresse im Format IPv4:port oder [IPv6]:port sein. Hostnamen werden in dieser Version nicht unterstützt.</string>
++  <string name="morphe_wireguard_error_invalid_routes">AllowedIPs darf höchstens 256 gültige IPv4/IPv6-Adressen oder CIDR-Routen enthalten.</string>
++  <string name="morphe_wireguard_error_unsupported_directive">Nicht unterstützte Anweisung. Shell-Hooks, Optionen für Routingtabellen und Erweiterungen, die nicht zu WireGuard gehören, werden nicht akzeptiert.</string>
++  <string name="morphe_wireguard_error_invalid_value">Ein Schlüssel oder ein numerischer Konfigurationswert ist ungültig.</string>
++  <string name="morphe_wireguard_error_line_too_long">Die Konfiguration enthält eine Zeile mit mehr als 4 KiB.</string>
++  <string name="morphe_wireguard_error_missing_required">PrivateKey, Address, PublicKey, Endpoint und AllowedIPs sind erforderlich.</string>
++  <string name="morphe_wireguard_error_ipv6_mtu">IPv6 erfordert eine MTU von mindestens 1280 Byte.</string>
++  <string name="morphe_wireguard_error_dns_required">Mindestens ein DNS-Server ist erforderlich; das Ausweichen auf System-DNS ist deaktiviert.</string>
++  <string name="morphe_wireguard_error_dns_not_routed">Jeder DNS-Server muss zu einer konfigurierten Adressfamilie gehören und durch AllowedIPs abgedeckt sein.</string>
++  <string name="morphe_wireguard_native_failed">Die WireGuard-Engine konnte nicht geladen werden. Patche eine unterstützte 64-Bit-APK erneut mit dem WireGuard-Proxy-Patch und installiere die App erneut.</string>
++  <string name="morphe_wireguard_store_failed">Das Profil wurde geprüft, konnte aber nicht sicher gespeichert werden. Prüfe den App-Speicher und die Verfügbarkeit von AndroidKeyStore und versuche es erneut.</string>
++  <string name="morphe_wireguard_load_failed">Das gespeicherte Profil konnte nicht gelesen oder entschlüsselt werden. Importiere es erneut. Prüfe bei anhaltenden Problemen den App-Speicher und die Verfügbarkeit von AndroidKeyStore.</string>
++  <string name="morphe_wireguard_missing_picker">Es ist keine Dokumentauswahl des Systems verfügbar.</string>
++  <string name="morphe_wireguard_unavailable">Der WireGuard-Proxy ist in dieser APK nicht enthalten. Patche die App erneut mit dem WireGuard-Proxy-Patch.</string>
++  <string name="morphe_wireguard_enable_confirm">App-internes WireGuard-Routing aktivieren und neu starten? Unterstützte Anfragen weichen bei einem Tunnelausfall nicht auf eine direkte Verbindung aus.</string>
++  <string name="morphe_wireguard_disable_confirm">WireGuard-Routing nach dem Neustart deaktivieren? Die App verwendet wieder ihre normale Verbindung oder den konfigurierten externen Proxy.</string>
++  <string name="morphe_wireguard_remove_confirm">Verschlüsseltes Profil und zugehörigen Verschlüsselungsschlüssel entfernen, WireGuard-Routing deaktivieren und neu starten? Die importierte Quelldatei wird nicht gelöscht.</string>
++  <string name="morphe_wireguard_apply_restart">Anwenden und neu starten</string>
++  <string name="morphe_wireguard_remove_failed">Das gespeicherte Profil konnte nicht vollständig entfernt werden. Prüfe den App-Speicher und versuche es erneut.</string>
++  <string name="morphe_wireguard_restart_failed">Ein Neustart ist erforderlich. Schließe die App vollständig und öffne sie erneut.</string>
++  <string name="morphe_wireguard_licenses">Open-Source-Lizenzen</string>
++  <string name="morphe_wireguard_licenses_failed">Die Open-Source-Lizenzen konnten nicht geladen werden.</string>
+ </resources>
+diff --git a/patches/src/main/resources/addresources/values-es-rES/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-es-rES/shared-youtube/strings.xml
+index e612fa109..263be8cc6 100644
+--- a/patches/src/main/resources/addresources/values-es-rES/shared-youtube/strings.xml
++++ b/patches/src/main/resources/addresources/values-es-rES/shared-youtube/strings.xml
+@@ -316,4 +316,66 @@ El ID del video que ves se envía a la API de Return YouTube Dislike, y tus me g
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">No se alcanzó ningún límite para el cliente</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">Se alcanzó el límite para el cliente %s veces</string>
+   <string name="morphe_ryd_statistics_millisecond_text">%s milisegundos</string>
++
++  <!-- Custom WireGuard translations; upstream translations remain Crowdin-managed. -->
++  <string name="morphe_wireguard_settings_title">Proxy WireGuard</string>
++  <string name="morphe_wireguard_settings_summary">Importa un perfil de WireGuard para usar un proxy solo en esta aplicación, sin una VPN del sistema</string>
++  <string name="morphe_wireguard_enabled_title">Usar proxy WireGuard</string>
++  <string name="morphe_wireguard_status_title">Enrutamiento actual</string>
++  <string name="morphe_wireguard_intro">Enruta las solicitudes compatibles de la aplicación a través de un perfil de WireGuard importado. Requiere exactamente un par, un Endpoint con IP numérica y un servidor DNS cubierto por AllowedIPs. No crea una VPN del sistema. No ofrece un bloqueo de red completo del sistema operativo; las solicitudes fuera de las rutas de red parcheadas no están cubiertas. QUIC se desactiva mientras esta función está activada.</string>
++  <string name="morphe_wireguard_profile_present">Hay un perfil cifrado guardado en este dispositivo.</string>
++  <string name="morphe_wireguard_profile_missing">No se ha importado ningún perfil de WireGuard.</string>
++  <string name="morphe_wireguard_state_disabled">Proceso actual: el enrutamiento de WireGuard está desactivado.</string>
++  <string name="morphe_wireguard_state_pending">Proceso actual: activado; el proxy local se inicia con la primera solicitud de red compatible.</string>
++  <string name="morphe_wireguard_state_ready">Proceso actual: proxy local listo. No se han verificado el handshake remoto ni el acceso a Internet.</string>
++  <string name="morphe_wireguard_state_blocked">Proceso actual: no se pudo iniciar WireGuard. Las solicitudes interceptadas se bloquean sin recurrir a una conexión directa.</string>
++  <string name="morphe_wireguard_saved_enabled">Modo guardado para el próximo inicio de la aplicación: activado.</string>
++  <string name="morphe_wireguard_saved_disabled">Modo guardado para el próximo inicio de la aplicación: desactivado.</string>
++  <string name="morphe_wireguard_restart_needed">Reinicia la aplicación para aplicar los cambios. Los motores de red existentes mantienen su enrutamiento actual hasta el reinicio.</string>
++  <string name="morphe_wireguard_import">Importar archivo .conf</string>
++  <string name="morphe_wireguard_enable">Activar y reiniciar</string>
++  <string name="morphe_wireguard_disable">Desactivar y reiniciar</string>
++  <string name="morphe_wireguard_remove">Eliminar perfil</string>
++  <string name="morphe_wireguard_restart">Reiniciar aplicación</string>
++  <string name="morphe_wireguard_busy">Procesando…</string>
++  <string name="morphe_wireguard_imported">Perfil guardado. Importarlo no activa el enrutamiento. Reinicia para usar un perfil de reemplazo.</string>
++  <string name="morphe_wireguard_import_failed">No se pudo completar la operación del perfil. Inténtalo de nuevo.</string>
++  <string name="morphe_wireguard_profile_error_title">Error en la operación del perfil</string>
++  <string name="morphe_wireguard_import_read_failed">No se pudo leer el documento seleccionado. Elige un archivo .conf de WireGuard accesible e inténtalo de nuevo.</string>
++  <string name="morphe_wireguard_import_too_large">El perfil supera los 64 KiB. Elige un archivo .conf de WireGuard más pequeño.</string>
++  <string name="morphe_wireguard_import_encoding_failed">El perfil no es UTF-8 válido. Guarda el archivo .conf de WireGuard como UTF-8 e inténtalo de nuevo.</string>
++  <string name="morphe_wireguard_import_invalid_text">El perfil está vacío o contiene texto no válido. Elige un archivo .conf de WireGuard en formato de texto.</string>
++  <string name="morphe_wireguard_validation_failed">Este perfil no es compatible con el proxy WireGuard interno de la aplicación.</string>
++  <string name="morphe_wireguard_error_invalid_text">La configuración debe ser texto UTF-8 válido de hasta 64 KiB.</string>
++  <string name="morphe_wireguard_error_invalid_interface">Se admite exactamente un bloque [Interface], seguido de un bloque [Peer].</string>
++  <string name="morphe_wireguard_error_invalid_peer">Se admite exactamente un bloque [Peer] después de [Interface].</string>
++  <string name="morphe_wireguard_error_unsupported_section">La configuración contiene una sección no compatible.</string>
++  <string name="morphe_wireguard_error_invalid_directive">La configuración contiene una directiva no válida o vacía.</string>
++  <string name="morphe_wireguard_error_duplicate_directive">No se permite repetir directivas que solo pueden aparecer una vez.</string>
++  <string name="morphe_wireguard_error_invalid_address">Address debe contener como máximo 8 direcciones IPv4/IPv6 de unidifusión, con máscaras CIDR opcionales.</string>
++  <string name="morphe_wireguard_error_duplicate_address">No se admiten direcciones de interfaz duplicadas.</string>
++  <string name="morphe_wireguard_error_invalid_dns">DNS debe contener como máximo 8 direcciones IP numéricas de unidifusión; los dominios de búsqueda no son compatibles.</string>
++  <string name="morphe_wireguard_error_invalid_mtu">MTU debe estar entre 576 y 9000 bytes.</string>
++  <string name="morphe_wireguard_error_invalid_endpoint">Endpoint debe ser una IP numérica con formato IPv4:port o [IPv6]:port. Los nombres de host no son compatibles en esta versión.</string>
++  <string name="morphe_wireguard_error_invalid_routes">AllowedIPs debe contener como máximo 256 direcciones IPv4/IPv6 o rutas CIDR válidas.</string>
++  <string name="morphe_wireguard_error_unsupported_directive">Directiva no compatible. No se aceptan comandos de shell asociados a eventos, opciones de tablas de enrutamiento ni extensiones ajenas a WireGuard.</string>
++  <string name="morphe_wireguard_error_invalid_value">Una clave o un valor numérico de la configuración no es válido.</string>
++  <string name="morphe_wireguard_error_line_too_long">La configuración contiene una línea de más de 4 KiB.</string>
++  <string name="morphe_wireguard_error_missing_required">Se requieren PrivateKey, Address, PublicKey, Endpoint y AllowedIPs.</string>
++  <string name="morphe_wireguard_error_ipv6_mtu">IPv6 requiere una MTU de al menos 1280 bytes.</string>
++  <string name="morphe_wireguard_error_dns_required">Se requiere al menos un servidor DNS; el recurso al DNS del sistema está desactivado.</string>
++  <string name="morphe_wireguard_error_dns_not_routed">Todos los servidores DNS deben pertenecer a una familia de direcciones configurada en la interfaz y estar cubiertos por AllowedIPs.</string>
++  <string name="morphe_wireguard_native_failed">No se pudo cargar el motor de WireGuard. Vuelve a aplicar el parche de proxy WireGuard usando un APK de 64 bits compatible y reinstala la aplicación.</string>
++  <string name="morphe_wireguard_store_failed">El perfil se ha validado, pero no se pudo guardar de forma segura. Comprueba el almacenamiento de la aplicación y la disponibilidad de AndroidKeyStore e inténtalo de nuevo.</string>
++  <string name="morphe_wireguard_load_failed">No se pudo leer o descifrar el perfil guardado. Impórtalo de nuevo. Si el problema persiste, comprueba el almacenamiento de la aplicación y la disponibilidad de AndroidKeyStore.</string>
++  <string name="morphe_wireguard_missing_picker">No hay ningún selector de documentos del sistema disponible.</string>
++  <string name="morphe_wireguard_unavailable">Este APK no incluye el proxy WireGuard. Vuelve a aplicar los parches incluyendo el parche de proxy WireGuard.</string>
++  <string name="morphe_wireguard_enable_confirm">¿Activar el enrutamiento de WireGuard solo para esta aplicación y reiniciar? Las solicitudes compatibles no recurrirán a una conexión directa si falla el túnel.</string>
++  <string name="morphe_wireguard_disable_confirm">¿Desactivar el enrutamiento de WireGuard después de reiniciar? La aplicación volverá a su conexión normal o al proxy externo configurado.</string>
++  <string name="morphe_wireguard_remove_confirm">¿Eliminar el perfil cifrado y su clave de cifrado, desactivar el enrutamiento de WireGuard y reiniciar? No se eliminará el archivo original que importaste.</string>
++  <string name="morphe_wireguard_apply_restart">Aplicar y reiniciar</string>
++  <string name="morphe_wireguard_remove_failed">No se pudo eliminar por completo el perfil guardado. Comprueba el almacenamiento de la aplicación e inténtalo de nuevo.</string>
++  <string name="morphe_wireguard_restart_failed">Es necesario reiniciar. Cierra la aplicación por completo y ábrela de nuevo.</string>
++  <string name="morphe_wireguard_licenses">Licencias de código abierto</string>
++  <string name="morphe_wireguard_licenses_failed">No se pudieron cargar las licencias de código abierto.</string>
+ </resources>
+diff --git a/patches/src/main/resources/addresources/values-fr-rFR/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-fr-rFR/shared-youtube/strings.xml
+index c414babda..89c020824 100644
+--- a/patches/src/main/resources/addresources/values-fr-rFR/shared-youtube/strings.xml
++++ b/patches/src/main/resources/addresources/values-fr-rFR/shared-youtube/strings.xml
+@@ -316,4 +316,65 @@ L'identifiant de la vidéo que vous regardez est envoyé à l'API de Return YouT
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">Aucune limite de débit du client n\'a été atteinte</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">La limite de débit du client a été atteinte %s fois</string>
+   <string name="morphe_ryd_statistics_millisecond_text">%s millisecondes</string>
++  <!-- misc.wireguard.wireGuardProxyPatch: custom distribution translations -->
++  <string name="morphe_wireguard_settings_title">Proxy WireGuard</string>
++  <string name="morphe_wireguard_settings_summary">Importer un profil WireGuard pour un proxy interne à l\'application, sans VPN système</string>
++  <string name="morphe_wireguard_enabled_title">Utiliser le proxy WireGuard</string>
++  <string name="morphe_wireguard_status_title">Routage actuel</string>
++  <string name="morphe_wireguard_intro">Achemine les requêtes prises en charge de l\'application via un profil WireGuard importé. Nécessite exactement un pair, un Endpoint à adresse IP numérique et un serveur DNS couvert par AllowedIPs. Aucun VPN système n\'est créé. Ce n\'est pas un coupe-circuit du système d\'exploitation ; les requêtes hors des chemins réseau modifiés ne sont pas couvertes. QUIC est désactivé lorsque la fonction est activée.</string>
++  <string name="morphe_wireguard_profile_present">Un profil chiffré est enregistré sur cet appareil.</string>
++  <string name="morphe_wireguard_profile_missing">Aucun profil WireGuard n\'a été importé.</string>
++  <string name="morphe_wireguard_state_disabled">Processus actuel : le routage WireGuard est désactivé.</string>
++  <string name="morphe_wireguard_state_pending">Processus actuel : activé ; le proxy local démarre à la première requête réseau prise en charge.</string>
++  <string name="morphe_wireguard_state_ready">Processus actuel : proxy local prêt. La négociation avec le serveur distant et l\'accès à Internet n\'ont pas été vérifiés.</string>
++  <string name="morphe_wireguard_state_blocked">Processus actuel : WireGuard n\'a pas pu démarrer. Les requêtes interceptées sont bloquées sans repli sur une connexion directe.</string>
++  <string name="morphe_wireguard_saved_enabled">Mode enregistré pour le prochain démarrage de l\'application : activé.</string>
++  <string name="morphe_wireguard_saved_disabled">Mode enregistré pour le prochain démarrage de l\'application : désactivé.</string>
++  <string name="morphe_wireguard_restart_needed">Redémarrez l\'application pour appliquer les modifications. Les moteurs réseau existants conservent leur routage actuel jusqu\'au redémarrage.</string>
++  <string name="morphe_wireguard_import">Importer un fichier .conf</string>
++  <string name="morphe_wireguard_enable">Activer et redémarrer</string>
++  <string name="morphe_wireguard_disable">Désactiver et redémarrer</string>
++  <string name="morphe_wireguard_remove">Supprimer le profil</string>
++  <string name="morphe_wireguard_restart">Redémarrer l\'application</string>
++  <string name="morphe_wireguard_busy">Traitement en cours…</string>
++  <string name="morphe_wireguard_imported">Profil enregistré. L\'importation seule n\'active pas le routage. Redémarrez pour utiliser un profil de remplacement.</string>
++  <string name="morphe_wireguard_import_failed">L\'opération sur le profil n\'a pas pu être terminée. Réessayez.</string>
++  <string name="morphe_wireguard_profile_error_title">Échec de l\'opération sur le profil</string>
++  <string name="morphe_wireguard_import_read_failed">Le document sélectionné n\'a pas pu être lu. Choisissez un fichier .conf WireGuard accessible, puis réessayez.</string>
++  <string name="morphe_wireguard_import_too_large">Le profil dépasse 64 KiB. Choisissez un fichier .conf WireGuard plus petit.</string>
++  <string name="morphe_wireguard_import_encoding_failed">Le profil n\'est pas un texte UTF-8 valide. Enregistrez le fichier .conf WireGuard en UTF-8, puis réessayez.</string>
++  <string name="morphe_wireguard_import_invalid_text">Le profil est vide ou contient du texte invalide. Choisissez un fichier .conf WireGuard au format texte.</string>
++  <string name="morphe_wireguard_validation_failed">Ce profil n\'est pas pris en charge par le proxy WireGuard interne à l\'application.</string>
++  <string name="morphe_wireguard_error_invalid_text">La configuration doit être un texte UTF-8 valide de 64 KiB maximum.</string>
++  <string name="morphe_wireguard_error_invalid_interface">Un seul [Interface], suivi d’un seul [Peer], est pris en charge.</string>
++  <string name="morphe_wireguard_error_invalid_peer">Un seul [Peer] est pris en charge après [Interface].</string>
++  <string name="morphe_wireguard_error_unsupported_section">La configuration contient une section non prise en charge.</string>
++  <string name="morphe_wireguard_error_invalid_directive">La configuration contient une directive invalide ou vide.</string>
++  <string name="morphe_wireguard_error_duplicate_directive">Les directives prévues pour une seule occurrence ne peuvent pas être répétées.</string>
++  <string name="morphe_wireguard_error_invalid_address">Address doit contenir au maximum 8 adresses IPv4/IPv6 unicast, avec des masques CIDR facultatifs.</string>
++  <string name="morphe_wireguard_error_duplicate_address">Les adresses d\'interface en double ne sont pas prises en charge.</string>
++  <string name="morphe_wireguard_error_invalid_dns">DNS doit contenir au maximum 8 adresses IP unicast numériques ; les domaines de recherche ne sont pas pris en charge.</string>
++  <string name="morphe_wireguard_error_invalid_mtu">MTU doit être compris entre 576 et 9000 octets.</string>
++  <string name="morphe_wireguard_error_invalid_endpoint">Endpoint doit être une adresse numérique au format IPv4:port ou [IPv6]:port. Les noms d\'hôte ne sont pas pris en charge dans cette version.</string>
++  <string name="morphe_wireguard_error_invalid_routes">AllowedIPs doit contenir au maximum 256 adresses IPv4/IPv6 valides ou routes CIDR.</string>
++  <string name="morphe_wireguard_error_unsupported_directive">Directive non prise en charge. Les scripts shell, les options de table de routage et les extensions autres que WireGuard ne sont pas acceptés.</string>
++  <string name="morphe_wireguard_error_invalid_value">Une clé ou une valeur numérique de configuration est invalide.</string>
++  <string name="morphe_wireguard_error_line_too_long">La configuration contient une ligne de plus de 4 KiB.</string>
++  <string name="morphe_wireguard_error_missing_required">PrivateKey, Address, PublicKey, Endpoint et AllowedIPs sont obligatoires.</string>
++  <string name="morphe_wireguard_error_ipv6_mtu">IPv6 nécessite un MTU d\'au moins 1280 octets.</string>
++  <string name="morphe_wireguard_error_dns_required">Au moins un serveur DNS est requis ; le repli sur le DNS du système est désactivé.</string>
++  <string name="morphe_wireguard_error_dns_not_routed">Chaque serveur DNS doit appartenir à une famille d\'adresses configurée et être couvert par AllowedIPs.</string>
++  <string name="morphe_wireguard_native_failed">Le moteur WireGuard n\'a pas pu être chargé. Appliquez à nouveau le patch de proxy WireGuard à un APK 64 bits pris en charge, puis réinstallez l\'application.</string>
++  <string name="morphe_wireguard_store_failed">Le profil a été validé, mais n\'a pas pu être enregistré de manière sécurisée. Vérifiez le stockage de l\'application et la disponibilité d\'AndroidKeyStore, puis réessayez.</string>
++  <string name="morphe_wireguard_load_failed">Le profil enregistré n\'a pas pu être lu ou déchiffré. Importez-le à nouveau. Si le problème persiste, vérifiez le stockage de l\'application et la disponibilité d\'AndroidKeyStore.</string>
++  <string name="morphe_wireguard_missing_picker">Aucun sélecteur de documents système n\'est disponible.</string>
++  <string name="morphe_wireguard_unavailable">Le proxy WireGuard n\'est pas inclus dans cet APK. Appliquez à nouveau le patch de proxy WireGuard.</string>
++  <string name="morphe_wireguard_enable_confirm">Activer le routage WireGuard interne à l\'application et redémarrer ? Les requêtes prises en charge ne se replient pas sur une connexion directe si le tunnel échoue.</string>
++  <string name="morphe_wireguard_disable_confirm">Désactiver le routage WireGuard après le redémarrage ? L\'application utilisera à nouveau sa connexion normale ou le proxy externe configuré.</string>
++  <string name="morphe_wireguard_remove_confirm">Supprimer le profil chiffré et sa clé de chiffrement, désactiver le routage WireGuard et redémarrer ? Le fichier source importé ne sera pas supprimé.</string>
++  <string name="morphe_wireguard_apply_restart">Appliquer et redémarrer</string>
++  <string name="morphe_wireguard_remove_failed">Le profil enregistré n\'a pas pu être entièrement supprimé. Vérifiez le stockage de l\'application, puis réessayez.</string>
++  <string name="morphe_wireguard_restart_failed">Un redémarrage est nécessaire. Fermez complètement l\'application, puis rouvrez-la.</string>
++  <string name="morphe_wireguard_licenses">Licences open source</string>
++  <string name="morphe_wireguard_licenses_failed">Les licences open source n\'ont pas pu être chargées.</string>
+ </resources>
+diff --git a/patches/src/main/resources/addresources/values-ja-rJP/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-ja-rJP/shared-youtube/strings.xml
+index 4eb0fa019..8ca027f81 100644
+--- a/patches/src/main/resources/addresources/values-ja-rJP/shared-youtube/strings.xml
++++ b/patches/src/main/resources/addresources/values-ja-rJP/shared-youtube/strings.xml
+@@ -316,4 +316,65 @@ YouTube Premium を利用している場合、この設定は必要ない可能
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">クライアントのレート制限は発生していません</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">クライアントのレート制限は %s 回発生しました</string>
+   <string name="morphe_ryd_statistics_millisecond_text">%s ミリ秒</string>
++  <!-- misc.wireguard.wireGuardProxyPatch (custom distribution translations) -->
++  <string name="morphe_wireguard_settings_title">WireGuard プロキシ</string>
++  <string name="morphe_wireguard_settings_summary">システム VPN を使わず、このアプリ内のプロキシ通信に使用する WireGuard プロファイルをインポートします</string>
++  <string name="morphe_wireguard_enabled_title">WireGuard プロキシを使用</string>
++  <string name="morphe_wireguard_status_title">現在のルーティング</string>
++  <string name="morphe_wireguard_intro">対応するアプリのリクエストを、インポートした WireGuard プロファイル経由で送信します。ピアは 1 つ、Endpoint は数値の IP アドレスである必要があり、DNS サーバーは AllowedIPs に含まれている必要があります。システム VPN は作成しません。OS 全体のキルスイッチではなく、パッチの対象外のネットワーク経路は保護されません。有効な間は QUIC が無効になります。</string>
++  <string name="morphe_wireguard_profile_present">この端末には暗号化されたプロファイルが保存されています。</string>
++  <string name="morphe_wireguard_profile_missing">WireGuard プロファイルはまだインポートされていません。</string>
++  <string name="morphe_wireguard_state_disabled">現在のプロセス：WireGuard ルーティングは無効です。</string>
++  <string name="morphe_wireguard_state_pending">現在のプロセス：有効です。最初の対応するネットワークリクエストでローカルプロキシが起動します。</string>
++  <string name="morphe_wireguard_state_ready">現在のプロセス：ローカルプロキシの準備ができました。リモートのハンドシェイクとインターネット接続は未確認です。</string>
++  <string name="morphe_wireguard_state_blocked">現在のプロセス：WireGuard を起動できませんでした。捕捉したリクエストは直接接続へ切り替わらず、ブロックされます。</string>
++  <string name="morphe_wireguard_saved_enabled">次回のアプリ起動時に適用する保存済みモード：有効。</string>
++  <string name="morphe_wireguard_saved_disabled">次回のアプリ起動時に適用する保存済みモード：無効。</string>
++  <string name="morphe_wireguard_restart_needed">変更を適用するにはアプリを再起動してください。既存のネットワークエンジンは再起動するまで現在のルーティングを維持します。</string>
++  <string name="morphe_wireguard_import">.conf ファイルをインポート</string>
++  <string name="morphe_wireguard_enable">有効にして再起動</string>
++  <string name="morphe_wireguard_disable">無効にして再起動</string>
++  <string name="morphe_wireguard_remove">プロファイルを削除</string>
++  <string name="morphe_wireguard_restart">アプリを再起動</string>
++  <string name="morphe_wireguard_busy">処理中…</string>
++  <string name="morphe_wireguard_imported">プロファイルを保存しました。インポートだけではルーティングは有効になりません。置き換えたプロファイルを使うには再起動してください。</string>
++  <string name="morphe_wireguard_import_failed">プロファイルの操作を完了できませんでした。もう一度お試しください。</string>
++  <string name="morphe_wireguard_profile_error_title">プロファイルの操作に失敗しました</string>
++  <string name="morphe_wireguard_import_read_failed">選択したドキュメントを読み取れませんでした。アクセス可能な WireGuard の .conf ファイルを選択して、もう一度お試しください。</string>
++  <string name="morphe_wireguard_import_too_large">プロファイルが 64 KiB を超えています。より小さい WireGuard の .conf ファイルを選択してください。</string>
++  <string name="morphe_wireguard_import_encoding_failed">プロファイルは有効な UTF-8 ではありません。WireGuard の .conf ファイルを UTF-8 で保存して、もう一度お試しください。</string>
++  <string name="morphe_wireguard_import_invalid_text">プロファイルが空か、無効なテキストを含んでいます。テキスト形式の WireGuard の .conf ファイルを選択してください。</string>
++  <string name="morphe_wireguard_validation_failed">このプロファイルは、アプリ内の WireGuard プロキシではサポートされていません。</string>
++  <string name="morphe_wireguard_error_invalid_text">設定は 64 KiB 以下の有効な UTF-8 テキストである必要があります。</string>
++  <string name="morphe_wireguard_error_invalid_interface">1 つの [Interface] と、その後に続く 1 つの [Peer] のみに対応しています。</string>
++  <string name="morphe_wireguard_error_invalid_peer">[Interface] の後に指定する [Peer] は 1 つのみに対応しています。</string>
++  <string name="morphe_wireguard_error_unsupported_section">設定にサポートされていないセクションが含まれています。</string>
++  <string name="morphe_wireguard_error_invalid_directive">設定に無効または空の設定項目が含まれています。</string>
++  <string name="morphe_wireguard_error_duplicate_directive">1 回だけ指定できる設定項目の重複には対応していません。</string>
++  <string name="morphe_wireguard_error_invalid_address">Address にはユニキャスト IPv4/IPv6 アドレスを最大 8 個指定できます。CIDR マスクは省略できます。</string>
++  <string name="morphe_wireguard_error_duplicate_address">インターフェースアドレスの重複には対応していません。</string>
++  <string name="morphe_wireguard_error_invalid_dns">DNS に指定できるのは数値表記のユニキャスト IP アドレス最大 8 個です。検索ドメインには対応していません。</string>
++  <string name="morphe_wireguard_error_invalid_mtu">MTU は 576～9000 バイトである必要があります。</string>
++  <string name="morphe_wireguard_error_invalid_endpoint">Endpoint は数値の IPv4:port または [IPv6]:port で指定してください。このバージョンはホスト名に対応していません。</string>
++  <string name="morphe_wireguard_error_invalid_routes">AllowedIPs には有効な IPv4/IPv6 アドレスまたは CIDR ルートを最大 256 個指定できます。</string>
++  <string name="morphe_wireguard_error_unsupported_directive">サポートされていない設定項目です。シェルフック、ルーティングテーブル設定、WireGuard 以外の拡張項目は使用できません。</string>
++  <string name="morphe_wireguard_error_invalid_value">キーまたは数値の設定値が無効です。</string>
++  <string name="morphe_wireguard_error_line_too_long">設定に 4 KiB を超える行が含まれています。</string>
++  <string name="morphe_wireguard_error_missing_required">PrivateKey、Address、PublicKey、Endpoint、AllowedIPs は必須です。</string>
++  <string name="morphe_wireguard_error_ipv6_mtu">IPv6 には 1280 バイト以上の MTU が必要です。</string>
++  <string name="morphe_wireguard_error_dns_required">DNS サーバーを 1 つ以上指定する必要があります。システム DNS へのフォールバックは無効です。</string>
++  <string name="morphe_wireguard_error_dns_not_routed">各 DNS サーバーについて、同じアドレスファミリーのインターフェースアドレスが設定され、AllowedIPs に含まれている必要があります。</string>
++  <string name="morphe_wireguard_native_failed">WireGuard エンジンを読み込めませんでした。対応する 64 ビット APK に WireGuard proxy パッチを適用し、アプリを再インストールしてください。</string>
++  <string name="morphe_wireguard_store_failed">プロファイルの検証には成功しましたが、安全に保存できませんでした。アプリの保存領域と AndroidKeyStore が利用できるか確認して、もう一度お試しください。</string>
++  <string name="morphe_wireguard_load_failed">保存されたプロファイルを読み取るか復号することができませんでした。プロファイルを再度インポートしてください。問題が続く場合は、アプリの保存領域と AndroidKeyStore が利用できるか確認してください。</string>
++  <string name="morphe_wireguard_missing_picker">システムのドキュメント選択機能を利用できません。</string>
++  <string name="morphe_wireguard_unavailable">この APK には WireGuard プロキシが含まれていません。WireGuard proxy パッチを含めて、アプリを再度パッチしてください。</string>
++  <string name="morphe_wireguard_enable_confirm">このアプリ内の WireGuard ルーティングを有効にして再起動しますか？ 対応するリクエストは、トンネルの障害時にも直接接続に切り替わりません。</string>
++  <string name="morphe_wireguard_disable_confirm">再起動後に WireGuard ルーティングを無効にしますか？ アプリは通常の接続、または設定された外部プロキシ接続に戻ります。</string>
++  <string name="morphe_wireguard_remove_confirm">暗号化されたプロファイルと暗号化キーを削除し、WireGuard ルーティングを無効にして再起動しますか？ インポート元のファイルは削除されません。</string>
++  <string name="morphe_wireguard_apply_restart">適用して再起動</string>
++  <string name="morphe_wireguard_remove_failed">保存されたプロファイルを完全に削除できませんでした。アプリの保存領域を確認して、もう一度お試しください。</string>
++  <string name="morphe_wireguard_restart_failed">再起動が必要です。アプリを完全に終了してから、もう一度開いてください。</string>
++  <string name="morphe_wireguard_licenses">オープンソースライセンス</string>
++  <string name="morphe_wireguard_licenses_failed">オープンソースライセンスを読み込めませんでした。</string>
+ </resources>
+diff --git a/patches/src/main/resources/addresources/values-ko-rKR/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-ko-rKR/shared-youtube/strings.xml
+index 9a8303ead..c05c80b8c 100644
+--- a/patches/src/main/resources/addresources/values-ko-rKR/shared-youtube/strings.xml
++++ b/patches/src/main/resources/addresources/values-ko-rKR/shared-youtube/strings.xml
+@@ -316,4 +316,66 @@ PotHelper를 다운로드하려면 여기를 탭하세요"</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">클라이언트 비율 제한이 발생하지 않았습니다</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">클라이언트 비율 제한이 %s 번 발생하였습니다</string>
+   <string name="morphe_ryd_statistics_millisecond_text">%s 밀리초</string>
++
++  <!-- WireGuard custom distribution translations. Upstream translations use Crowdin. -->
++  <string name="morphe_wireguard_settings_title">WireGuard 프록시</string>
++  <string name="morphe_wireguard_settings_summary">시스템 VPN 없이 앱 전용 프록시로 사용할 WireGuard 프로필 가져오기</string>
++  <string name="morphe_wireguard_enabled_title">WireGuard 프록시 사용</string>
++  <string name="morphe_wireguard_status_title">현재 라우팅 상태</string>
++  <string name="morphe_wireguard_intro">지원되는 앱 요청을 가져온 WireGuard 프로필을 통해 전달합니다. 피어는 정확히 하나여야 하며, Endpoint는 숫자 IP이고 DNS 서버는 AllowedIPs 범위에 있어야 합니다. 시스템 VPN은 생성하지 않습니다. 운영체제 전체의 통신을 차단하는 킬 스위치가 아니며, 패치된 네트워크 경로 밖의 요청은 보호하지 않습니다. 활성화하면 QUIC이 비활성화됩니다.</string>
++  <string name="morphe_wireguard_profile_present">암호화된 프로필이 이 기기에 저장되어 있습니다.</string>
++  <string name="morphe_wireguard_profile_missing">가져온 WireGuard 프로필이 없습니다.</string>
++  <string name="morphe_wireguard_state_disabled">현재 프로세스: WireGuard 라우팅이 꺼져 있습니다.</string>
++  <string name="morphe_wireguard_state_pending">현재 프로세스: 활성화되어 있으며, 첫 번째 지원 네트워크 요청 시 로컬 프록시가 시작됩니다.</string>
++  <string name="morphe_wireguard_state_ready">현재 프로세스: 로컬 프록시가 준비되었습니다. 원격 핸드셰이크와 인터넷 연결은 아직 확인되지 않았습니다.</string>
++  <string name="morphe_wireguard_state_blocked">현재 프로세스: WireGuard를 시작하지 못했습니다. 가로챈 요청은 직접 연결로 전환되지 않고 차단됩니다.</string>
++  <string name="morphe_wireguard_saved_enabled">다음 앱 시작에 적용할 저장된 모드: 켜짐.</string>
++  <string name="morphe_wireguard_saved_disabled">다음 앱 시작에 적용할 저장된 모드: 꺼짐.</string>
++  <string name="morphe_wireguard_restart_needed">변경 사항을 적용하려면 앱을 다시 시작하세요. 기존 네트워크 엔진은 다시 시작할 때까지 현재 라우팅을 유지합니다.</string>
++  <string name="morphe_wireguard_import">.conf 파일 가져오기</string>
++  <string name="morphe_wireguard_enable">활성화하고 다시 시작</string>
++  <string name="morphe_wireguard_disable">비활성화하고 다시 시작</string>
++  <string name="morphe_wireguard_remove">프로필 삭제</string>
++  <string name="morphe_wireguard_restart">앱 다시 시작</string>
++  <string name="morphe_wireguard_busy">작업 중…</string>
++  <string name="morphe_wireguard_imported">프로필을 저장했습니다. 가져오기만으로 라우팅이 활성화되지는 않습니다. 교체한 프로필을 사용하려면 앱을 다시 시작하세요.</string>
++  <string name="morphe_wireguard_import_failed">프로필 작업을 완료하지 못했습니다. 다시 시도하세요.</string>
++  <string name="morphe_wireguard_profile_error_title">프로필 작업 실패</string>
++  <string name="morphe_wireguard_import_read_failed">선택한 문서를 읽지 못했습니다. 접근 가능한 WireGuard .conf 파일을 선택하고 다시 시도하세요.</string>
++  <string name="morphe_wireguard_import_too_large">프로필이 64 KiB를 초과합니다. 더 작은 WireGuard .conf 파일을 선택하세요.</string>
++  <string name="morphe_wireguard_import_encoding_failed">프로필이 올바른 UTF-8 형식이 아닙니다. WireGuard .conf 파일을 UTF-8로 저장한 뒤 다시 시도하세요.</string>
++  <string name="morphe_wireguard_import_invalid_text">프로필이 비어 있거나 올바르지 않은 문자가 포함되어 있습니다. 텍스트 형식의 WireGuard .conf 파일을 선택하세요.</string>
++  <string name="morphe_wireguard_validation_failed">앱 내부 WireGuard 프록시에서 지원하지 않는 프로필입니다.</string>
++  <string name="morphe_wireguard_error_invalid_text">설정은 64 KiB 이하의 올바른 UTF-8 텍스트여야 합니다.</string>
++  <string name="morphe_wireguard_error_invalid_interface">[Interface] 하나 뒤에 [Peer] 하나가 오는 구성만 지원합니다.</string>
++  <string name="morphe_wireguard_error_invalid_peer">[Interface] 뒤에 오는 [Peer]는 정확히 하나여야 합니다.</string>
++  <string name="morphe_wireguard_error_unsupported_section">설정에 지원하지 않는 섹션이 있습니다.</string>
++  <string name="morphe_wireguard_error_invalid_directive">설정 항목이 올바르지 않거나 값이 비어 있습니다.</string>
++  <string name="morphe_wireguard_error_duplicate_directive">한 번만 지정해야 하는 설정 항목이 중복되어 있습니다.</string>
++  <string name="morphe_wireguard_error_invalid_address">Address에는 유니캐스트 IPv4/IPv6 주소를 최대 8개 지정할 수 있으며, CIDR 마스크는 생략할 수 있습니다.</string>
++  <string name="morphe_wireguard_error_duplicate_address">인터페이스 주소의 중복은 지원하지 않습니다.</string>
++  <string name="morphe_wireguard_error_invalid_dns">DNS에는 숫자로 된 유니캐스트 IP 주소를 최대 8개 지정할 수 있습니다. 검색 도메인은 지원하지 않습니다.</string>
++  <string name="morphe_wireguard_error_invalid_mtu">MTU는 576~9000바이트여야 합니다.</string>
++  <string name="morphe_wireguard_error_invalid_endpoint">Endpoint는 숫자로 된 IPv4:port 또는 [IPv6]:port 형식이어야 합니다. 이 버전에서는 호스트 이름을 지원하지 않습니다.</string>
++  <string name="morphe_wireguard_error_invalid_routes">AllowedIPs에는 유효한 IPv4/IPv6 주소 또는 CIDR 경로를 최대 256개 지정할 수 있습니다.</string>
++  <string name="morphe_wireguard_error_unsupported_directive">지원하지 않는 설정 항목입니다. 셸 훅, 라우팅 테이블 옵션 및 표준 WireGuard 이외의 확장은 허용하지 않습니다.</string>
++  <string name="morphe_wireguard_error_invalid_value">키 또는 숫자 설정값이 올바르지 않습니다.</string>
++  <string name="morphe_wireguard_error_line_too_long">설정에 4 KiB를 초과하는 줄이 있습니다.</string>
++  <string name="morphe_wireguard_error_missing_required">PrivateKey, Address, PublicKey, Endpoint, AllowedIPs는 필수 항목입니다.</string>
++  <string name="morphe_wireguard_error_ipv6_mtu">IPv6를 사용하려면 MTU가 1280바이트 이상이어야 합니다.</string>
++  <string name="morphe_wireguard_error_dns_required">DNS 서버가 하나 이상 필요합니다. 시스템 DNS로 대체하지 않습니다.</string>
++  <string name="morphe_wireguard_error_dns_not_routed">모든 DNS 서버는 설정된 인터페이스 주소 계열과 일치하고 AllowedIPs 범위에 있어야 합니다.</string>
++  <string name="morphe_wireguard_native_failed">WireGuard 엔진을 불러오지 못했습니다. 지원되는 64비트 APK에 WireGuard 프록시 패치를 다시 적용하고 패치한 앱을 설치하세요.</string>
++  <string name="morphe_wireguard_store_failed">프로필 검증은 완료했지만 안전하게 저장하지 못했습니다. 앱 저장 공간과 AndroidKeyStore의 사용 가능 여부를 확인한 뒤 다시 시도하세요.</string>
++  <string name="morphe_wireguard_load_failed">저장된 프로필을 읽거나 복호화하지 못했습니다. 프로필을 다시 가져오세요. 문제가 계속되면 앱 저장 공간과 AndroidKeyStore의 사용 가능 여부를 확인하세요.</string>
++  <string name="morphe_wireguard_missing_picker">사용 가능한 시스템 문서 선택기가 없습니다.</string>
++  <string name="morphe_wireguard_unavailable">이 APK에 WireGuard 프록시가 포함되어 있지 않습니다. WireGuard 프록시 패치를 포함하여 다시 패치하세요.</string>
++  <string name="morphe_wireguard_enable_confirm">앱 전용 WireGuard 라우팅을 켜고 다시 시작할까요? 지원되는 요청은 터널이 실패해도 직접 연결로 전환되지 않습니다.</string>
++  <string name="morphe_wireguard_disable_confirm">다시 시작한 뒤 WireGuard 라우팅을 끌까요? 앱이 기본 연결 또는 설정된 외부 프록시 연결로 돌아갑니다.</string>
++  <string name="morphe_wireguard_remove_confirm">암호화된 프로필과 암호화 키를 삭제하고 WireGuard 라우팅을 끈 뒤 다시 시작할까요? 가져올 때 선택한 원본 파일은 삭제하지 않습니다.</string>
++  <string name="morphe_wireguard_apply_restart">적용하고 다시 시작</string>
++  <string name="morphe_wireguard_remove_failed">저장된 프로필을 완전히 삭제하지 못했습니다. 앱 저장 공간을 확인한 뒤 다시 시도하세요.</string>
++  <string name="morphe_wireguard_restart_failed">다시 시작해야 합니다. 앱을 완전히 종료한 뒤 다시 여세요.</string>
++  <string name="morphe_wireguard_licenses">오픈소스 라이선스</string>
++  <string name="morphe_wireguard_licenses_failed">오픈소스 라이선스를 불러오지 못했습니다.</string>
+ </resources>
+diff --git a/patches/src/main/resources/addresources/values-pt-rBR/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-pt-rBR/shared-youtube/strings.xml
+index 8c28d4ed3..f730dfcb9 100644
+--- a/patches/src/main/resources/addresources/values-pt-rBR/shared-youtube/strings.xml
++++ b/patches/src/main/resources/addresources/values-pt-rBR/shared-youtube/strings.xml
+@@ -316,4 +316,66 @@ O ID do vídeo que você assiste é enviado para a API do Return YouTube Dislike
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">Nenhum limite de taxa do cliente encontrado</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">Limite de taxa do cliente atingido %s vezes</string>
+   <string name="morphe_ryd_statistics_millisecond_text">%s milisegundos</string>
++
++  <!-- Custom WireGuard translations; upstream translations remain Crowdin-managed. -->
++  <string name="morphe_wireguard_settings_title">Proxy WireGuard</string>
++  <string name="morphe_wireguard_settings_summary">Importe um perfil do WireGuard para usar um proxy apenas neste aplicativo, sem uma VPN do sistema</string>
++  <string name="morphe_wireguard_enabled_title">Usar proxy WireGuard</string>
++  <string name="morphe_wireguard_status_title">Roteamento atual</string>
++  <string name="morphe_wireguard_intro">Roteia as requisições compatíveis do aplicativo por um perfil do WireGuard importado. Exige exatamente um par, um Endpoint com IP numérico e um servidor DNS coberto por AllowedIPs. Não cria uma VPN do sistema. Não oferece um bloqueio de rede completo do sistema operacional; requisições fora dos caminhos de rede modificados pelos patches não são cobertas. O QUIC fica desativado enquanto esta função está ativada.</string>
++  <string name="morphe_wireguard_profile_present">Há um perfil criptografado armazenado neste dispositivo.</string>
++  <string name="morphe_wireguard_profile_missing">Nenhum perfil do WireGuard foi importado.</string>
++  <string name="morphe_wireguard_state_disabled">Processo atual: o roteamento via WireGuard está desativado.</string>
++  <string name="morphe_wireguard_state_pending">Processo atual: ativado; o proxy local é iniciado na primeira requisição de rede compatível.</string>
++  <string name="morphe_wireguard_state_ready">Processo atual: proxy local pronto. O handshake remoto e o acesso à Internet não foram verificados.</string>
++  <string name="morphe_wireguard_state_blocked">Processo atual: não foi possível iniciar o WireGuard. As requisições interceptadas são bloqueadas sem recorrer a uma conexão direta.</string>
++  <string name="morphe_wireguard_saved_enabled">Modo salvo para a próxima inicialização do aplicativo: ativado.</string>
++  <string name="morphe_wireguard_saved_disabled">Modo salvo para a próxima inicialização do aplicativo: desativado.</string>
++  <string name="morphe_wireguard_restart_needed">Reinicie o aplicativo para aplicar as alterações. Os mecanismos de rede existentes mantêm o roteamento atual até a reinicialização.</string>
++  <string name="morphe_wireguard_import">Importar arquivo .conf</string>
++  <string name="morphe_wireguard_enable">Ativar e reiniciar</string>
++  <string name="morphe_wireguard_disable">Desativar e reiniciar</string>
++  <string name="morphe_wireguard_remove">Remover perfil</string>
++  <string name="morphe_wireguard_restart">Reiniciar aplicativo</string>
++  <string name="morphe_wireguard_busy">Processando…</string>
++  <string name="morphe_wireguard_imported">Perfil salvo. A importação por si só não ativa o roteamento. Reinicie para usar um perfil de substituição.</string>
++  <string name="morphe_wireguard_import_failed">Não foi possível concluir a operação do perfil. Tente novamente.</string>
++  <string name="morphe_wireguard_profile_error_title">Falha na operação do perfil</string>
++  <string name="morphe_wireguard_import_read_failed">Não foi possível ler o documento selecionado. Escolha um arquivo .conf do WireGuard acessível e tente novamente.</string>
++  <string name="morphe_wireguard_import_too_large">O perfil excede 64 KiB. Escolha um arquivo .conf do WireGuard menor.</string>
++  <string name="morphe_wireguard_import_encoding_failed">O perfil não está em UTF-8 válido. Salve o arquivo .conf do WireGuard como UTF-8 e tente novamente.</string>
++  <string name="morphe_wireguard_import_invalid_text">O perfil está vazio ou contém texto inválido. Escolha um arquivo .conf do WireGuard em formato de texto.</string>
++  <string name="morphe_wireguard_validation_failed">Este perfil não é compatível com o proxy WireGuard interno do aplicativo.</string>
++  <string name="morphe_wireguard_error_invalid_text">A configuração deve ser um texto UTF-8 válido de no máximo 64 KiB.</string>
++  <string name="morphe_wireguard_error_invalid_interface">É aceito exatamente um bloco [Interface], seguido de um bloco [Peer].</string>
++  <string name="morphe_wireguard_error_invalid_peer">É aceito exatamente um bloco [Peer] após [Interface].</string>
++  <string name="morphe_wireguard_error_unsupported_section">A configuração contém uma seção não compatível.</string>
++  <string name="morphe_wireguard_error_invalid_directive">A configuração contém uma diretiva inválida ou vazia.</string>
++  <string name="morphe_wireguard_error_duplicate_directive">Não é permitido repetir diretivas que só podem aparecer uma vez.</string>
++  <string name="morphe_wireguard_error_invalid_address">Address deve conter no máximo 8 endereços IPv4/IPv6 unicast, com máscaras CIDR opcionais.</string>
++  <string name="morphe_wireguard_error_duplicate_address">Endereços de interface duplicados não são aceitos.</string>
++  <string name="morphe_wireguard_error_invalid_dns">DNS deve conter no máximo 8 endereços IP unicast numéricos; domínios de pesquisa não são aceitos.</string>
++  <string name="morphe_wireguard_error_invalid_mtu">MTU deve estar entre 576 e 9000 bytes.</string>
++  <string name="morphe_wireguard_error_invalid_endpoint">Endpoint deve ser um IP numérico no formato IPv4:port ou [IPv6]:port. Nomes de host não são compatíveis com esta versão.</string>
++  <string name="morphe_wireguard_error_invalid_routes">AllowedIPs deve conter no máximo 256 entradas válidas: endereços IPv4/IPv6 ou rotas CIDR.</string>
++  <string name="morphe_wireguard_error_unsupported_directive">Diretiva não compatível. Comandos de shell associados a eventos, opções de tabelas de roteamento e extensões que não pertencem ao WireGuard não são aceitos.</string>
++  <string name="morphe_wireguard_error_invalid_value">Uma chave ou um valor numérico da configuração é inválido.</string>
++  <string name="morphe_wireguard_error_line_too_long">A configuração contém uma linha com mais de 4 KiB.</string>
++  <string name="morphe_wireguard_error_missing_required">PrivateKey, Address, PublicKey, Endpoint e AllowedIPs são obrigatórios.</string>
++  <string name="morphe_wireguard_error_ipv6_mtu">IPv6 exige uma MTU de pelo menos 1280 bytes.</string>
++  <string name="morphe_wireguard_error_dns_required">É necessário pelo menos um servidor DNS; o uso do DNS do sistema como alternativa está desativado.</string>
++  <string name="morphe_wireguard_error_dns_not_routed">Cada servidor DNS deve usar uma família de endereços configurada na interface e estar coberto por AllowedIPs.</string>
++  <string name="morphe_wireguard_native_failed">Não foi possível carregar o mecanismo do WireGuard. Aplique novamente o patch de proxy WireGuard usando um APK de 64 bits compatível e reinstale o aplicativo.</string>
++  <string name="morphe_wireguard_store_failed">O perfil foi validado, mas não pôde ser salvo com segurança. Verifique o armazenamento do aplicativo e a disponibilidade do AndroidKeyStore e tente novamente.</string>
++  <string name="morphe_wireguard_load_failed">Não foi possível ler ou descriptografar o perfil salvo. Importe o perfil novamente. Se o problema persistir, verifique o armazenamento do aplicativo e a disponibilidade do AndroidKeyStore.</string>
++  <string name="morphe_wireguard_missing_picker">Nenhum seletor de documentos do sistema está disponível.</string>
++  <string name="morphe_wireguard_unavailable">O proxy WireGuard não está incluído neste APK. Aplique novamente os patches incluindo o patch de proxy WireGuard.</string>
++  <string name="morphe_wireguard_enable_confirm">Ativar o roteamento via WireGuard apenas neste aplicativo e reiniciar? As requisições compatíveis não recorrerão a uma conexão direta se o túnel falhar.</string>
++  <string name="morphe_wireguard_disable_confirm">Desativar o roteamento via WireGuard após reiniciar? O aplicativo voltará à conexão normal ou ao proxy externo configurado.</string>
++  <string name="morphe_wireguard_remove_confirm">Remover o perfil criptografado e a chave de criptografia, desativar o roteamento via WireGuard e reiniciar? O arquivo de origem importado não será excluído.</string>
++  <string name="morphe_wireguard_apply_restart">Aplicar e reiniciar</string>
++  <string name="morphe_wireguard_remove_failed">Não foi possível remover completamente o perfil salvo. Verifique o armazenamento do aplicativo e tente novamente.</string>
++  <string name="morphe_wireguard_restart_failed">É necessário reiniciar. Feche o aplicativo completamente e abra-o novamente.</string>
++  <string name="morphe_wireguard_licenses">Licenças de código aberto</string>
++  <string name="morphe_wireguard_licenses_failed">Não foi possível carregar as licenças de código aberto.</string>
+ </resources>
+diff --git a/patches/src/main/resources/addresources/values-zh-rCN/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-zh-rCN/shared-youtube/strings.xml
+index 948a0df15..0d09597e4 100644
+--- a/patches/src/main/resources/addresources/values-zh-rCN/shared-youtube/strings.xml
++++ b/patches/src/main/resources/addresources/values-zh-rCN/shared-youtube/strings.xml
+@@ -316,4 +316,65 @@ Second \"item\" text"</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">未遇到客户端速率限制</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">遇到客户端速率限制 %s 次</string>
+   <string name="morphe_ryd_statistics_millisecond_text">%s 毫秒</string>
++  <!-- misc.wireguard.wireGuardProxyPatch (custom distribution translations) -->
++  <string name="morphe_wireguard_settings_title">WireGuard 代理</string>
++  <string name="morphe_wireguard_settings_summary">导入 WireGuard 配置，仅为此应用提供代理，无需系统 VPN</string>
++  <string name="morphe_wireguard_enabled_title">使用 WireGuard 代理</string>
++  <string name="morphe_wireguard_status_title">当前路由</string>
++  <string name="morphe_wireguard_intro">通过导入的 WireGuard 配置转发受支持的应用请求。必须恰好包含一个对等端、使用数字 IP 的 Endpoint，以及被 AllowedIPs 覆盖的 DNS 服务器。不会创建系统 VPN，也不提供操作系统级断网保护；未被补丁拦截的网络路径不在保护范围内。启用时会禁用 QUIC。</string>
++  <string name="morphe_wireguard_profile_present">此设备上已保存加密配置。</string>
++  <string name="morphe_wireguard_profile_missing">尚未导入 WireGuard 配置。</string>
++  <string name="morphe_wireguard_state_disabled">当前进程：WireGuard 路由已禁用。</string>
++  <string name="morphe_wireguard_state_pending">当前进程：已启用；本地代理将在首个受支持的网络请求到来时启动。</string>
++  <string name="morphe_wireguard_state_ready">当前进程：本地代理已就绪。尚未验证远程握手及互联网访问。</string>
++  <string name="morphe_wireguard_state_blocked">当前进程：WireGuard 无法启动。拦截的请求会被阻止，不会回退到直接连接。</string>
++  <string name="morphe_wireguard_saved_enabled">为下次应用启动保存的模式：启用。</string>
++  <string name="morphe_wireguard_saved_disabled">为下次应用启动保存的模式：禁用。</string>
++  <string name="morphe_wireguard_restart_needed">请重启应用以应用更改。现有网络引擎在重启前会保留当前路由。</string>
++  <string name="morphe_wireguard_import">导入 .conf 文件</string>
++  <string name="morphe_wireguard_enable">启用并重启</string>
++  <string name="morphe_wireguard_disable">禁用并重启</string>
++  <string name="morphe_wireguard_remove">移除配置</string>
++  <string name="morphe_wireguard_restart">重启应用</string>
++  <string name="morphe_wireguard_busy">处理中…</string>
++  <string name="morphe_wireguard_imported">配置已保存。仅导入不会启用路由。请重启以使用替换后的配置。</string>
++  <string name="morphe_wireguard_import_failed">无法完成配置操作。请重试。</string>
++  <string name="morphe_wireguard_profile_error_title">配置操作失败</string>
++  <string name="morphe_wireguard_import_read_failed">无法读取所选文档。请选择可访问的 WireGuard .conf 文件并重试。</string>
++  <string name="morphe_wireguard_import_too_large">配置超过 64 KiB。请选择更小的 WireGuard .conf 文件。</string>
++  <string name="morphe_wireguard_import_encoding_failed">配置不是有效的 UTF-8 文本。请将 WireGuard .conf 文件另存为 UTF-8 后重试。</string>
++  <string name="morphe_wireguard_import_invalid_text">配置为空或包含无效文本。请选择文本格式的 WireGuard .conf 文件。</string>
++  <string name="morphe_wireguard_validation_failed">应用内的 WireGuard 代理不支持此配置。</string>
++  <string name="morphe_wireguard_error_invalid_text">配置必须是有效的 UTF-8 文本，且不超过 64 KiB。</string>
++  <string name="morphe_wireguard_error_invalid_interface">仅支持一个 [Interface]，且其后必须有一个 [Peer]。</string>
++  <string name="morphe_wireguard_error_invalid_peer">仅支持在 [Interface] 之后配置一个 [Peer]。</string>
++  <string name="morphe_wireguard_error_unsupported_section">配置包含不受支持的节。</string>
++  <string name="morphe_wireguard_error_invalid_directive">配置包含无效或为空的指令。</string>
++  <string name="morphe_wireguard_error_duplicate_directive">不支持重复指定只能出现一次的指令。</string>
++  <string name="morphe_wireguard_error_invalid_address">Address 最多可包含 8 个单播 IPv4/IPv6 地址，CIDR 掩码可省略。</string>
++  <string name="morphe_wireguard_error_duplicate_address">不支持重复的接口地址。</string>
++  <string name="morphe_wireguard_error_invalid_dns">DNS 最多可包含 8 个数字形式的单播 IP 地址；不支持搜索域。</string>
++  <string name="morphe_wireguard_error_invalid_mtu">MTU 必须介于 576 和 9000 字节之间。</string>
++  <string name="morphe_wireguard_error_invalid_endpoint">Endpoint 必须采用数字形式的 IPv4:port 或 [IPv6]:port。此版本不支持主机名。</string>
++  <string name="morphe_wireguard_error_invalid_routes">AllowedIPs 最多可包含 256 个有效的 IPv4/IPv6 地址或 CIDR 路由。</string>
++  <string name="morphe_wireguard_error_unsupported_directive">不支持此指令。不接受 shell 钩子、路由表选项及非 WireGuard 扩展。</string>
++  <string name="morphe_wireguard_error_invalid_value">密钥或数字配置值无效。</string>
++  <string name="morphe_wireguard_error_line_too_long">配置中有一行超过 4 KiB。</string>
++  <string name="morphe_wireguard_error_missing_required">必须提供 PrivateKey、Address、PublicKey、Endpoint 和 AllowedIPs。</string>
++  <string name="morphe_wireguard_error_ipv6_mtu">IPv6 要求 MTU 至少为 1280 字节。</string>
++  <string name="morphe_wireguard_error_dns_required">必须至少提供一个 DNS 服务器；已禁用回退到系统 DNS。</string>
++  <string name="morphe_wireguard_error_dns_not_routed">每个 DNS 服务器都必须有对应地址族的接口地址，且被 AllowedIPs 覆盖。</string>
++  <string name="morphe_wireguard_native_failed">无法加载 WireGuard 引擎。请使用受支持的 64 位 APK 重新应用 WireGuard proxy 补丁，然后重新安装应用。</string>
++  <string name="morphe_wireguard_store_failed">配置已通过验证，但无法安全保存。请检查应用存储及 AndroidKeyStore 是否可用，然后重试。</string>
++  <string name="morphe_wireguard_load_failed">无法读取或解密已保存的配置。请重新导入配置。如果问题仍然存在，请检查应用存储及 AndroidKeyStore 是否可用。</string>
++  <string name="morphe_wireguard_missing_picker">没有可用的系统文档选择器。</string>
++  <string name="morphe_wireguard_unavailable">此 APK 未包含 WireGuard 代理。请使用 WireGuard proxy 补丁重新修补。</string>
++  <string name="morphe_wireguard_enable_confirm">启用仅限此应用的 WireGuard 路由并重启？隧道故障时，受支持的请求不会回退到直接连接。</string>
++  <string name="morphe_wireguard_disable_confirm">重启后禁用 WireGuard 路由？应用将恢复正常连接或已配置的外部代理连接。</string>
++  <string name="morphe_wireguard_remove_confirm">移除加密配置及其加密密钥、禁用 WireGuard 路由并重启？您导入的源文件不会被删除。</string>
++  <string name="morphe_wireguard_apply_restart">应用并重启</string>
++  <string name="morphe_wireguard_remove_failed">无法完全移除已保存的配置。请检查应用存储并重试。</string>
++  <string name="morphe_wireguard_restart_failed">需要重启。请彻底关闭应用后重新打开。</string>
++  <string name="morphe_wireguard_licenses">开源许可证</string>
++  <string name="morphe_wireguard_licenses_failed">无法加载开源许可证。</string>
+ </resources>
+diff --git a/patches/src/main/resources/addresources/values-zh-rTW/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-zh-rTW/shared-youtube/strings.xml
+index 743acd47d..04da26880 100644
+--- a/patches/src/main/resources/addresources/values-zh-rTW/shared-youtube/strings.xml
++++ b/patches/src/main/resources/addresources/values-zh-rTW/shared-youtube/strings.xml
+@@ -316,4 +316,65 @@ If later turned off, it is recommended to clear the app data to prevent UI bugs"
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">未遭遇客戶端速率限制</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">遭遇用戶端速率限制 %s 次</string>
+   <string name="morphe_ryd_statistics_millisecond_text">%s 毫秒</string>
++  <!-- misc.wireguard.wireGuardProxyPatch (custom distribution translations) -->
++  <string name="morphe_wireguard_settings_title">WireGuard 代理</string>
++  <string name="morphe_wireguard_settings_summary">匯入 WireGuard 設定檔，僅為此應用程式提供代理，無需系統 VPN</string>
++  <string name="morphe_wireguard_enabled_title">使用 WireGuard 代理</string>
++  <string name="morphe_wireguard_status_title">目前路由</string>
++  <string name="morphe_wireguard_intro">透過匯入的 WireGuard 設定檔轉送支援的應用程式請求。必須恰好包含一個對等端、使用數字 IP 的 Endpoint，以及位於 AllowedIPs 範圍內的 DNS 伺服器。不會建立系統 VPN，也不提供作業系統層級的斷網保護；補丁未攔截的網路路徑不在保護範圍內。啟用時會停用 QUIC。</string>
++  <string name="morphe_wireguard_profile_present">此裝置上已儲存加密的設定檔。</string>
++  <string name="morphe_wireguard_profile_missing">尚未匯入 WireGuard 設定檔。</string>
++  <string name="morphe_wireguard_state_disabled">目前程序：WireGuard 路由已停用。</string>
++  <string name="morphe_wireguard_state_pending">目前程序：已啟用；本機代理會在第一個支援的網路請求到來時啟動。</string>
++  <string name="morphe_wireguard_state_ready">目前程序：本機代理已就緒。遠端交握及網際網路存取尚未驗證。</string>
++  <string name="morphe_wireguard_state_blocked">目前程序：無法啟動 WireGuard。攔截的請求會被阻擋，不會退回直接連線。</string>
++  <string name="morphe_wireguard_saved_enabled">為下次應用程式啟動儲存的模式：啟用。</string>
++  <string name="morphe_wireguard_saved_disabled">為下次應用程式啟動儲存的模式：停用。</string>
++  <string name="morphe_wireguard_restart_needed">請重新啟動應用程式以套用變更。現有網路引擎會在重新啟動前保留目前路由。</string>
++  <string name="morphe_wireguard_import">匯入 .conf 檔案</string>
++  <string name="morphe_wireguard_enable">啟用並重新啟動</string>
++  <string name="morphe_wireguard_disable">停用並重新啟動</string>
++  <string name="morphe_wireguard_remove">移除設定檔</string>
++  <string name="morphe_wireguard_restart">重新啟動應用程式</string>
++  <string name="morphe_wireguard_busy">處理中…</string>
++  <string name="morphe_wireguard_imported">設定檔已儲存。僅匯入不會啟用路由。請重新啟動以使用替換後的設定檔。</string>
++  <string name="morphe_wireguard_import_failed">無法完成設定檔操作。請再試一次。</string>
++  <string name="morphe_wireguard_profile_error_title">設定檔操作失敗</string>
++  <string name="morphe_wireguard_import_read_failed">無法讀取所選文件。請選擇可存取的 WireGuard .conf 檔案，再試一次。</string>
++  <string name="morphe_wireguard_import_too_large">設定檔超過 64 KiB。請選擇較小的 WireGuard .conf 檔案。</string>
++  <string name="morphe_wireguard_import_encoding_failed">設定檔並非有效的 UTF-8 文字。請將 WireGuard .conf 檔案另存為 UTF-8 後再試一次。</string>
++  <string name="morphe_wireguard_import_invalid_text">設定檔為空白或含有無效文字。請選擇文字格式的 WireGuard .conf 檔案。</string>
++  <string name="morphe_wireguard_validation_failed">應用程式內的 WireGuard 代理不支援此設定檔。</string>
++  <string name="morphe_wireguard_error_invalid_text">設定必須是有效的 UTF-8 文字，且不可超過 64 KiB。</string>
++  <string name="morphe_wireguard_error_invalid_interface">僅支援一個 [Interface]，且其後必須有一個 [Peer]。</string>
++  <string name="morphe_wireguard_error_invalid_peer">僅支援在 [Interface] 之後設定一個 [Peer]。</string>
++  <string name="morphe_wireguard_error_unsupported_section">設定含有不支援的區段。</string>
++  <string name="morphe_wireguard_error_invalid_directive">設定含有無效或空白的指令。</string>
++  <string name="morphe_wireguard_error_duplicate_directive">不支援重複指定只能出現一次的指令。</string>
++  <string name="morphe_wireguard_error_invalid_address">Address 最多可包含 8 個單點傳播 IPv4/IPv6 位址，CIDR 遮罩可省略。</string>
++  <string name="morphe_wireguard_error_duplicate_address">不支援重複的介面位址。</string>
++  <string name="morphe_wireguard_error_invalid_dns">DNS 最多可包含 8 個數字格式的單點傳播 IP 位址；不支援搜尋網域。</string>
++  <string name="morphe_wireguard_error_invalid_mtu">MTU 必須介於 576 和 9000 位元組之間。</string>
++  <string name="morphe_wireguard_error_invalid_endpoint">Endpoint 必須使用數字格式的 IPv4:port 或 [IPv6]:port。此版本不支援主機名稱。</string>
++  <string name="morphe_wireguard_error_invalid_routes">AllowedIPs 最多可包含 256 個有效的 IPv4/IPv6 位址或 CIDR 路由。</string>
++  <string name="morphe_wireguard_error_unsupported_directive">不支援此指令。不接受 shell 掛鉤、路由表選項及非 WireGuard 擴充功能。</string>
++  <string name="morphe_wireguard_error_invalid_value">金鑰或數字設定值無效。</string>
++  <string name="morphe_wireguard_error_line_too_long">設定中有一行超過 4 KiB。</string>
++  <string name="morphe_wireguard_error_missing_required">必須提供 PrivateKey、Address、PublicKey、Endpoint 與 AllowedIPs。</string>
++  <string name="morphe_wireguard_error_ipv6_mtu">IPv6 要求 MTU 至少為 1280 位元組。</string>
++  <string name="morphe_wireguard_error_dns_required">必須至少提供一部 DNS 伺服器；已停用退回系統 DNS 的功能。</string>
++  <string name="morphe_wireguard_error_dns_not_routed">每部 DNS 伺服器都必須有相同位址族的介面位址，且位於 AllowedIPs 允許的範圍內。</string>
++  <string name="morphe_wireguard_native_failed">無法載入 WireGuard 引擎。請使用支援的 64 位元 APK 重新套用 WireGuard proxy 補丁，然後重新安裝應用程式。</string>
++  <string name="morphe_wireguard_store_failed">設定檔已通過驗證，但無法安全儲存。請檢查應用程式儲存空間及 AndroidKeyStore 是否可用，再試一次。</string>
++  <string name="morphe_wireguard_load_failed">無法讀取或解密已儲存的設定檔。請重新匯入設定檔。若問題仍持續，請檢查應用程式儲存空間及 AndroidKeyStore 是否可用。</string>
++  <string name="morphe_wireguard_missing_picker">沒有可用的系統文件選擇器。</string>
++  <string name="morphe_wireguard_unavailable">此 APK 未包含 WireGuard 代理。請使用 WireGuard proxy 補丁重新修補。</string>
++  <string name="morphe_wireguard_enable_confirm">啟用僅限此應用程式的 WireGuard 路由並重新啟動？通道故障時，支援的請求不會退回直接連線。</string>
++  <string name="morphe_wireguard_disable_confirm">重新啟動後停用 WireGuard 路由？應用程式將恢復正常連線或已設定的外部代理連線。</string>
++  <string name="morphe_wireguard_remove_confirm">移除加密設定檔及其加密金鑰、停用 WireGuard 路由並重新啟動？您匯入的來源檔案不會被刪除。</string>
++  <string name="morphe_wireguard_apply_restart">套用並重新啟動</string>
++  <string name="morphe_wireguard_remove_failed">無法完整移除已儲存的設定檔。請檢查應用程式儲存空間，再試一次。</string>
++  <string name="morphe_wireguard_restart_failed">需要重新啟動。請完全關閉應用程式後再次開啟。</string>
++  <string name="morphe_wireguard_licenses">開放原始碼授權</string>
++  <string name="morphe_wireguard_licenses_failed">無法載入開放原始碼授權。</string>
+ </resources>
 diff --git a/patches/src/main/resources/addresources/values/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values/shared-youtube/strings.xml
-index 506985d02..fccd495dc 100644
+index 506985d02..6e5b39636 100644
 --- a/patches/src/main/resources/addresources/values/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values/shared-youtube/strings.xml
-@@ -192,6 +192,49 @@ To sign in, press continue below"</string>
+@@ -192,6 +192,68 @@ To sign in, press continue below"</string>
      <string name="morphe_skip_silence_minimum_pause_title">Minimum pause length</string>
      <string name="morphe_skip_silence_minimum_pause_summary">Only pauses at least this long are shortened. Takes effect when the next video starts</string>
  
@@ -8367,6 +9292,25 @@ index 506985d02..fccd495dc 100644
 +    <string name="morphe_wireguard_import_encoding_failed">The profile is not valid UTF-8. Save the WireGuard .conf file as UTF-8 and try again.</string>
 +    <string name="morphe_wireguard_import_invalid_text">The profile is empty or contains invalid text. Choose a text WireGuard .conf file.</string>
 +    <string name="morphe_wireguard_validation_failed">This profile is not supported by the app-local WireGuard proxy.</string>
++    <string name="morphe_wireguard_error_invalid_text">Configuration must be valid UTF-8 text of at most 64 KiB.</string>
++    <string name="morphe_wireguard_error_invalid_interface">Exactly one [Interface], followed by one [Peer], is supported.</string>
++    <string name="morphe_wireguard_error_invalid_peer">Exactly one [Peer] after [Interface] is supported.</string>
++    <string name="morphe_wireguard_error_unsupported_section">Configuration contains an unsupported section.</string>
++    <string name="morphe_wireguard_error_invalid_directive">Configuration contains an invalid or empty directive.</string>
++    <string name="morphe_wireguard_error_duplicate_directive">Duplicate singleton directives are not supported.</string>
++    <string name="morphe_wireguard_error_invalid_address">Address must contain at most 8 unicast IPv4/IPv6 addresses with optional CIDR masks.</string>
++    <string name="morphe_wireguard_error_duplicate_address">Duplicate interface addresses are not supported.</string>
++    <string name="morphe_wireguard_error_invalid_dns">DNS must contain at most 8 numeric unicast IP addresses; search domains are unsupported.</string>
++    <string name="morphe_wireguard_error_invalid_mtu">MTU must be between 576 and 9000 bytes.</string>
++    <string name="morphe_wireguard_error_invalid_endpoint">Endpoint must be numeric IPv4:port or [IPv6]:port. Hostnames are unsupported in this version.</string>
++    <string name="morphe_wireguard_error_invalid_routes">AllowedIPs must contain at most 256 valid IPv4/IPv6 addresses or CIDR routes.</string>
++    <string name="morphe_wireguard_error_unsupported_directive">Unsupported directive. Shell hooks, routing-table options, and non-WireGuard extensions are not accepted.</string>
++    <string name="morphe_wireguard_error_invalid_value">A key or numeric configuration value is invalid.</string>
++    <string name="morphe_wireguard_error_line_too_long">Configuration contains a line longer than 4 KiB.</string>
++    <string name="morphe_wireguard_error_missing_required">PrivateKey, Address, PublicKey, Endpoint and AllowedIPs are required.</string>
++    <string name="morphe_wireguard_error_ipv6_mtu">IPv6 requires an MTU of at least 1280 bytes.</string>
++    <string name="morphe_wireguard_error_dns_required">At least one DNS server is required; system DNS fallback is disabled.</string>
++    <string name="morphe_wireguard_error_dns_not_routed">Every DNS server must have a configured address family and be covered by AllowedIPs.</string>
 +    <string name="morphe_wireguard_native_failed">The WireGuard engine could not be loaded. Repatch with the WireGuard proxy patch using a supported 64-bit APK, then reinstall the app.</string>
 +    <string name="morphe_wireguard_store_failed">The profile was validated, but could not be saved securely. Check app storage and AndroidKeyStore availability, then try again.</string>
 +    <string name="morphe_wireguard_load_failed">The stored profile could not be read or decrypted. Import the profile again. Check app storage and AndroidKeyStore availability if the problem continues.</string>
@@ -9305,6 +10249,152 @@ index 000000000..3676e7d5b
 +
 +if __name__ == "__main__":
 +    unittest.main()
+diff --git a/scripts/tests/test_wireguard_i18n.py b/scripts/tests/test_wireguard_i18n.py
+new file mode 100644
+index 000000000..5bfd27834
+--- /dev/null
++++ b/scripts/tests/test_wireguard_i18n.py
+@@ -0,0 +1,86 @@
++# SPDX-License-Identifier: GPL-3.0-only
++# See the included NOTICE file for additional GPLv3 Section 7 requirements.
++"""Cross-language diagnostic/resource contracts; no Android or Crowdin execution."""
++
++from collections import Counter
++from pathlib import Path
++import re
++import unittest
++import xml.etree.ElementTree as ET
++
++
++ROOT = Path(__file__).resolve().parents[2]
++RESOURCE_GROUP = "shared-youtube/strings.xml"
++RESOURCE_ROOT = ROOT / "patches/src/main/resources/addresources"
++PROFILE_OPERATIONS = (ROOT / "extensions/shared-youtube/library/src/main/java"
++                      / "app/morphe/extension/shared/wireguard/ProfileOperations.java")
++
++
++def native_diagnostics():
++    """Read the finite wire-protocol table at its native error construction sites."""
++    source = (ROOT / "native/wireguard/config.go").read_text(encoding="utf-8")
++    return re.findall(r'\binvalid\(\s*"([a-z0-9_]+)"\s*,\s*"([^"\n]*)"\s*\)', source)
++
++
++def java_diagnostic_resources():
++    """Read only the code-to-resource binding table, not workflow implementation."""
++    source = PROFILE_OPERATIONS.read_text(encoding="utf-8")
++    return re.findall(r'case\s+"([a-z0-9_]+)"\s*->\s*"(morphe_wireguard_error_[a-z0-9_]+)"', source)
++
++
++class WireGuardI18nContractTest(unittest.TestCase):
++    def test_every_native_error_has_one_machine_code_and_localized_binding(self):
++        native = native_diagnostics()
++        source = (ROOT / "native/wireguard/config.go").read_text(encoding="utf-8")
++        self.assertTrue(native, "No native diagnostic codes found")
++        self.assertEqual(len(native), len(re.findall(r'\breturn\s+nil,\s*invalid\(', source)),
++                         "A native error lacks a fixed code/reason pair")
++        codes = [code for code, _ in native]
++        self.assertEqual(len(codes), len(set(codes)), "Native diagnostic codes are duplicated")
++        bindings = java_diagnostic_resources()
++        self.assertEqual(set(codes), {code for code, _ in bindings},
++                         "A native error would lose its translated explanation")
++        self.assertEqual(len(bindings), len(codes), "A diagnostic code has multiple bindings")
++
++    def test_all_bound_resources_exist_once_and_are_translatable(self):
++        resources = ET.parse(RESOURCE_ROOT / "values" / RESOURCE_GROUP).getroot().findall("string")
++        names = Counter(item.attrib["name"] for item in resources)
++        by_name = {item.attrib["name"]: item for item in resources}
++        for code, key in java_diagnostic_resources():
++            with self.subTest(code=code):
++                self.assertEqual(names[key], 1, key)
++                self.assertTrue("".join(by_name[key].itertext()).strip(), key)
++                self.assertNotEqual(by_name[key].get("translatable"), "false", key)
++        for key in ("morphe_wireguard_validation_failed", "morphe_wireguard_profile_error_title"):
++            self.assertEqual(names[key], 1, key)
++
++    def test_crowdin_uses_existing_android_resource_group(self):
++        config = (ROOT / "crowdin.yml").read_text(encoding="utf-8")
++        source = "patches/src/main/resources/addresources/values/" + RESOURCE_GROUP
++        blocks = re.split(r"(?m)^\s*-\s+source:\s*", config)[1:]
++        matching = [block for block in blocks if block.splitlines()[0].strip().strip('"') == source]
++        self.assertEqual(len(matching), 1, "WireGuard must share the established resource group")
++        target = re.search(r"(?m)^\s*translation:\s*(.+)$", matching[0])
++        self.assertIsNotNone(target)
++        self.assertEqual(target.group(1).strip().strip('"'),
++                         "patches/src/main/resources/addresources/values-%android_code%/" + RESOURCE_GROUP)
++
++    def test_existing_locale_entries_have_english_source_keys(self):
++        english = ET.parse(RESOURCE_ROOT / "values" / RESOURCE_GROUP).getroot().findall("string")
++        known = {item.attrib["name"] for item in english if item.attrib["name"].startswith("morphe_wireguard_")}
++        self.assertTrue(known)
++        # Zero translated entries is allowed: translation-ready code is not proof of translation.
++        for path in RESOURCE_ROOT.glob("values-*/" + RESOURCE_GROUP):
++            if b"morphe_wireguard_" not in path.read_bytes():
++                continue
++            entries = [item for item in ET.parse(path).getroot().findall("string")
++                       if item.attrib["name"].startswith("morphe_wireguard_")]
++            names = [item.attrib["name"] for item in entries]
++            with self.subTest(locale=path.parent.parent.name):
++                self.assertEqual(len(names), len(set(names)), "Duplicate translated WireGuard keys")
++                self.assertLessEqual(set(names), known, "Translated key has no English fallback")
++                self.assertTrue(all("".join(item.itertext()).strip() for item in entries))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/scripts/tests/test_wireguard_locales.py b/scripts/tests/test_wireguard_locales.py
+new file mode 100644
+index 000000000..c3fb7ebd0
+--- /dev/null
++++ b/scripts/tests/test_wireguard_locales.py
+@@ -0,0 +1,48 @@
++# SPDX-License-Identifier: GPL-3.0-only
++"""Compiled locale/value verification, using small aapt2 fixtures only."""
++import importlib.util
++from pathlib import Path
++import unittest
++
++path = Path(__file__).resolve().parents[1] / 'verify-wireguard-locales.py'
++spec = importlib.util.spec_from_file_location('wireguard_locales', path)
++CHECK = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(CHECK)
++
++
++class WireGuardLocalesTest(unittest.TestCase):
++    def test_locale_configs_and_android_apostrophes(self):
++        text = '''    resource 0x7f140001 string/morphe_wireguard_error_invalid_peer
++      () "Only one peer."
++      (ko) "피어는 하나여야 합니다."
++      (fr) "L'application exige un seul pair."
++    resource 0x7f140002 string/unrelated
++      (ko) "Unrelated"
++'''
++        expected = {'': {'morphe_wireguard_error_invalid_peer': 'Only one peer.'},
++                    'ko': {'morphe_wireguard_error_invalid_peer': '피어는 하나여야 합니다.'},
++                    'fr': {'morphe_wireguard_error_invalid_peer': "L\\'application exige un seul pair."}}
++        self.assertEqual(CHECK.verify_tables(CHECK.parsed_resources(text), expected),
++                         {'default': 1, 'ko': 1, 'fr': 1})
++
++    def test_english_only_cannot_pass_as_localized(self):
++        tables = {'morphe_wireguard_settings_title': {'': 'WireGuard proxy'}}
++        with self.assertRaisesRegex(ValueError, 'Missing or changed'):
++            CHECK.verify_tables(tables, {'ko': {'morphe_wireguard_settings_title': 'WireGuard 프록시'}})
++
++    def test_wrong_locale_value_is_rejected(self):
++        tables = {'morphe_wireguard_settings_title': {'ko': 'Wrong'}}
++        with self.assertRaisesRegex(ValueError, 'Missing or changed'):
++            CHECK.verify_tables(tables, {'ko': {'morphe_wireguard_settings_title': 'WireGuard 프록시'}})
++
++    def test_duplicate_compiled_locale_is_rejected(self):
++        text = '''resource 0x7f140001 string/morphe_wireguard_settings_title
++ () "First"
++ () "Second"
++'''
++        with self.assertRaisesRegex(ValueError, 'Duplicate compiled locale'):
++            CHECK.parsed_resources(text)
++
++
++if __name__ == '__main__':
++    unittest.main()
 diff --git a/scripts/validate-wireguard-apk.py b/scripts/validate-wireguard-apk.py
 new file mode 100644
 index 000000000..a30197429
@@ -9970,7 +11060,7 @@ index 000000000..a30197429
 +    sys.exit(main())
 diff --git a/scripts/verify-wireguard-bundle.py b/scripts/verify-wireguard-bundle.py
 new file mode 100644
-index 000000000..a591ae015
+index 000000000..29594aaf2
 --- /dev/null
 +++ b/scripts/verify-wireguard-bundle.py
 @@ -0,0 +1,184 @@
@@ -10074,7 +11164,7 @@ index 000000000..a591ae015
 +        resource_names = [item.attrib["name"] for item in resources.findall("string")]
 +        required = {"morphe_wireguard_settings_title", "morphe_wireguard_settings_summary"}
 +        for source in (repo / "extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/wireguard").glob("*.java"):
-+            required.update(re.findall(r'"(morphe_wireguard_[a-z_]+)"', source.read_text()))
++            required.update(re.findall(r'"(morphe_wireguard_[a-z0-9_]+)"', source.read_text()))
 +        require(required <= set(resource_names), "Some WireGuard UI strings are missing from bundle")
 +        require(all(resource_names.count(name) == 1 for name in required), "Duplicate WireGuard strings")
 +        print(f"PASS UI resources: {len(required)} keys; original and dependency notices present")
@@ -10157,6 +11247,115 @@ index 000000000..a591ae015
 +
 +
 +if __name__ == "__main__":
++    main()
+diff --git a/scripts/verify-wireguard-locales.py b/scripts/verify-wireguard-locales.py
+new file mode 100644
+index 000000000..b5c4f2e8f
+--- /dev/null
++++ b/scripts/verify-wireguard-locales.py
+@@ -0,0 +1,103 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-3.0-only
++"""Verify custom WireGuard translations and their compiled Android configurations."""
++import argparse
++import hashlib
++import json
++from pathlib import Path
++import re
++import subprocess
++import unicodedata
++import xml.etree.ElementTree as ET
++import zipfile
++
++LOCALES = {'ko-rKR': 'ko', 'ja-rJP': 'ja', 'zh-rCN': 'zh-rCN', 'zh-rTW': 'zh-rTW',
++           'es-rES': 'es', 'fr-rFR': 'fr', 'de-rDE': 'de', 'pt-rBR': 'pt-rBR'}
++PREFIX = 'morphe_wireguard_'
++GROUP = 'shared-youtube/strings.xml'
++
++
++def resource_strings(contents):
++    items = ET.fromstring(contents).findall('string')
++    names = [x.attrib['name'] for x in items]
++    if len(names) != len(set(names)):
++        raise ValueError('Duplicate resource names')
++    return {x.attrib['name']: ''.join(x.itertext()) for x in items if x.attrib['name'].startswith(PREFIX)}
++
++
++def normalize(value):
++    # New strings are single-line, unformatted text; Android removes these escapes.
++    return unicodedata.normalize('NFC', value.replace("\\'", "'").replace('\\"', '"')).strip()
++
++
++def parsed_resources(text):
++    resources = {}
++    current = None
++    for line in text.splitlines():
++        if re.match(r'\s*resource\s+', line):
++            match = re.search(r'\bstring/(morphe_wireguard_[a-z0-9_]+)\s*$', line)
++            current = match.group(1) if match else None
++            if current:
++                if current in resources:
++                    raise ValueError('Duplicate compiled resource: ' + current)
++                resources[current] = {}
++            continue
++        match = re.match(r'\s*\(([^)]*)\)\s+"(.*)"\s*$', line)
++        if current and match:
++            locale, value = match.groups()
++            if locale in resources[current]:
++                raise ValueError('Duplicate compiled locale: ' + current + '/' + locale)
++            resources[current][locale] = normalize(value)
++    return resources
++
++
++def verify_tables(tables, expected):
++    for locale, strings in expected.items():
++        for key, value in strings.items():
++            actual = tables.get(key, {}).get(locale)
++            if actual != normalize(value):
++                raise ValueError('Missing or changed localized resource: ' + key + '/' + (locale or 'default'))
++    return {locale or 'default': len(strings) for locale, strings in expected.items()}
++
++
++def verify(bundle, apks, aapt2):
++    with zipfile.ZipFile(bundle) as archive:
++        english = resource_strings(archive.read('addresources/values/' + GROUP))
++        if len(english) != 60:
++            raise ValueError('Expected exactly 60 English WireGuard resources')
++        expected = {'': english}
++        for source, target in LOCALES.items():
++            translated = resource_strings(archive.read('addresources/values-' + source + '/' + GROUP))
++            if translated.keys() != english.keys() or not all(v.strip() for v in translated.values()):
++                raise ValueError('Incomplete WireGuard translation: ' + source)
++            expected[target] = translated
++    checks = []
++    for apk in apks:
++        process = subprocess.run([str(aapt2), 'dump', 'resources', str(apk)], check=True,
++                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
++        counts = verify_tables(parsed_resources(process.stdout.decode('utf-8', errors='replace')), expected)
++        checks.append({'apk': str(apk), 'apk_sha256': hashlib.sha256(apk.read_bytes()).hexdigest(),
++                       'verified_resource_counts': counts, 'status': 'PASS'})
++    return {'status': 'PASS', 'bundle_sha256': hashlib.sha256(bundle.read_bytes()).hexdigest(),
++            'locales': LOCALES, 'strings_per_locale': len(english), 'apks': checks,
++            'scope': 'Compiled resources and value equality; Android rendering NOT RUN'}
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('bundle', type=Path)
++    parser.add_argument('--apk', type=Path, action='append', default=[])
++    parser.add_argument('--aapt2', type=Path)
++    parser.add_argument('--output', type=Path)
++    args = parser.parse_args()
++    if args.apk and not args.aapt2:
++        parser.error('--aapt2 is required with --apk')
++    report = verify(args.bundle, args.apk, args.aapt2)
++    text = json.dumps(report, ensure_ascii=False, indent=2) + '\n'
++    if args.output:
++        args.output.write_text(text)
++    print(text, end='')
++
++
++if __name__ == '__main__':
 +    main()
 diff --git a/tests/wireguard-android/WireGuardAndroidJniSmoke.java b/tests/wireguard-android/WireGuardAndroidJniSmoke.java
 new file mode 100644
@@ -10348,10 +11547,10 @@ index 000000000..9084106ae
 +}
 diff --git a/tests/wireguard-jni/WireGuardJniSmoke.java b/tests/wireguard-jni/WireGuardJniSmoke.java
 new file mode 100644
-index 000000000..87f89ee78
+index 000000000..4432210f9
 --- /dev/null
 +++ b/tests/wireguard-jni/WireGuardJniSmoke.java
-@@ -0,0 +1,134 @@
+@@ -0,0 +1,167 @@
 +// SPDX-License-Identifier: GPL-3.0-only
 +import app.morphe.extension.shared.wireguard.NativeTunnel;
 +
@@ -10399,6 +11598,18 @@ index 000000000..87f89ee78
 +        throw new AssertionError("Expected " + type.getName());
 +    }
 +
++    private static void rejectsProfile(String code, String config) {
++        try {
++            NativeTunnel.validate(config);
++        } catch (NativeTunnel.InvalidProfileException error) {
++            check(code.equals(error.getMessage()), "Wrong native localization code");
++            check(!error.getMessage().contains(key(1))
++                    && !error.getMessage().contains("secret-hook-marker"), "Native code leaked profile data");
++            return;
++        }
++        throw new AssertionError("Expected native profile rejection: " + code);
++    }
++
 +    private static String request(int port, String auth) throws Exception {
 +        try (Socket socket = new Socket()) {
 +            socket.connect(new InetSocketAddress("127.0.0.1", port), 1000);
@@ -10431,6 +11642,27 @@ index 000000000..87f89ee78
 +                .replace("DNS = 10.77.0.1", "DNS = fd00:77::1")
 +                .replace("AllowedIPs = 10.77.0.0/24", "AllowedIPs = fd00:77::1"));
 +        checks++;
++        rejectsProfile("invalid_text", "");
++        rejectsProfile("invalid_interface", "[Interface]\n" + config());
++        rejectsProfile("invalid_peer", config() + "[Peer]\n");
++        rejectsProfile("unsupported_section", config().replace("[Interface]", "[Other]"));
++        rejectsProfile("invalid_directive", "[Interface]\nPrivateKey = \n");
++        rejectsProfile("duplicate_directive", config().replace("[Peer]", "MTU = 1420\nMTU = 1420\n[Peer]"));
++        rejectsProfile("invalid_address", config().replace("Address = 10.77.0.2/32", "Address = client.invalid"));
++        rejectsProfile("duplicate_address", config().replace("Address = 10.77.0.2/32",
++                "Address = 10.77.0.2/32, 10.77.0.2/32"));
++        rejectsProfile("invalid_dns", config().replace("DNS = 10.77.0.1", "DNS = dns.invalid"));
++        rejectsProfile("invalid_mtu", config().replace("[Peer]", "MTU = 0\n[Peer]"));
++        rejectsProfile("invalid_endpoint", config().replace("127.0.0.1:51820", "vpn.example:51820"));
++        rejectsProfile("invalid_routes", config().replace("10.77.0.0/24", "10.77.0.0/33"));
++        rejectsProfile("unsupported_directive", config().replace("[Peer]", "PostUp = secret-hook-marker\n[Peer]"));
++        rejectsProfile("invalid_value", config().replace("PrivateKey = ", "PrivateKey = BAD"));
++        rejectsProfile("line_too_long", config() + "#".repeat(4097));
++        rejectsProfile("missing_required", config().replace("PublicKey = ", "# PublicKey = "));
++        rejectsProfile("ipv6_mtu", config().replace("Address = 10.77.0.2/32",
++                "Address = 10.77.0.2/32, fd00:77::2/128").replace("[Peer]", "MTU = 1200\n[Peer]"));
++        rejectsProfile("dns_required", config().replace("DNS = 10.77.0.1\n", ""));
++        rejectsProfile("dns_not_routed", config().replace("DNS = 10.77.0.1", "DNS = 1.1.1.1"));
 +        rejects(IllegalArgumentException.class, () -> NativeTunnel.validate(null));
 +        rejects(IllegalArgumentException.class, () -> NativeTunnel.validate(""));
 +        rejects(IllegalArgumentException.class, () -> NativeTunnel.validate("x".repeat(65537)));

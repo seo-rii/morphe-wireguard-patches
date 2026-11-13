@@ -12,25 +12,39 @@ index 058cb3b9b..34343181c 100644
  # Local configuration file (sdk path, etc.)
 diff --git a/README-WIREGUARD.md b/README-WIREGUARD.md
 new file mode 100644
-index 000000000..834c0fe7e
+index 000000000..09d0ebb74
 --- /dev/null
 +++ b/README-WIREGUARD.md
-@@ -0,0 +1,127 @@
+@@ -0,0 +1,141 @@
 +# App-local WireGuard preview — 비공식 Morphe 수정본
 +
-+Morphe Patches v2.1.0에 YouTube와 YouTube Music용 앱 내부 WireGuard 프록시를
-+추가한 **비공식 실험 배포판**입니다. MorpheApp 또는 Proton의 공식 제품이 아닙니다.
-+기존 기반 커밋 `8fa2c7a1a832498de8f179748998a3ca87e198eb`과 해당 버전의
-+다른 패치는 유지합니다. upstream 기여용 브랜치에서 확인한 WireGuard 관련 수정만
-+백포팅했으며 최신 upstream 전체를 덮어쓰지 않았습니다.
++공식 Morphe Patches v2.2.0에 YouTube와 YouTube Music용 앱 내부 WireGuard
++프록시를 추가한 **비공식 실험 배포판**입니다. MorpheApp 또는 Proton의 공식 제품이 아닙니다.
++공식 안정판 커밋 `44031c561ea048c8f196877f30a49c13bfd6afb6`을 기존 커스텀
++브랜치에 병합하여 해당 릴리스의 다른 패치와 수정 사항을 포함합니다. v2.1.5의
++WireGuard 엔진·프로필 저장 형식·내부 설정 화면의 언어 수정·8개 언어 번역은 유지합니다.
++이후의 미출시 upstream dev 변경은 포함하지 않습니다.
 +
 +관리자는 v2.1.1을 실제 Android 기기에서 잘 사용했다고 확인했습니다(2026-11-07).
-+이 경험과 v2.1.5 자동화 검증은 구분합니다. 실제 YouTube/Music 앱의 UI 확인, 서버 handshake, 재생, DNS 경로 및
++이 경험과 v2.2.0 자동화 검증은 구분합니다. 실제 YouTube/Music 앱의 UI 확인, 서버 handshake, 재생, DNS 경로 및
 +Wi-Fi/모바일 전환은 독립된 화면 하네스 검증과 구분하며 새로 실행한 것으로
-+간주하지 않습니다. [이번 변경 및 검증 기록](docs/wireguard-i18n-2.1.5.md)과
++간주하지 않습니다. [이번 변경 및 검증 기록](docs/wireguard-upstream-2.2.0.md)과
 +[기기 검증 절차](docs/wireguard-device-acceptance.md)를 참고하세요.
 +
-+## v2.1.5 변경
++**v2.2.0 주의:** YouTube 21.30.216/21.45.82의 전체 기본 선택 검증에서
++`Feed card layout` fingerprint 오류를 관측했습니다. 공식 번들도 같은
++21.30.216 입력에서 동일하게 실패했습니다. 해당 앱 패치 시 이 패치를 명시적으로
++해제하세요. 공식 패치 목록과 기본 선택 값은 임의로 변경하지 않습니다.
++WireGuard만 선택한 검증 및 별도 선택 조합의 결과는 위 검증 기록에 구분합니다.
++
++## v2.2.0 변경
++
++- 공식 v2.2.0의 전체 패치·오류 수정·호환 버전 정보를 반영합니다.
++- 공식 공통 라이브러리 `2.2.0-dev.3`의 정확한 소스 커밋을 고정합니다.
++- WireGuard 전송 구조와 비활성화 기본값은 유지하며, Music의 갱신된 실험 버전을
++  메타데이터 검사에 반영합니다. 선언된 버전과 실제 APK 검증 결과는 별도로 기록합니다.
++
++## 유지된 v2.1.5 변경
 +
 +- 진입 메뉴와 내부 화면의 언어가 달라질 수 있던 문자열 조회 경로를 수정합니다.
 +  내부 제목·설정 행·상태·대화상자·토스트는 현재 화면의 언어 컨텍스트를 사용하며
@@ -81,8 +95,8 @@ index 000000000..834c0fe7e
 +
 +| 항목 | 범위 |
 +| --- | --- |
-+| YouTube | 기반 버전의 선언된 대상 중 20.47.62 이상; 더 오래된 버전은 WireGuard 설치를 건너뜀 |
-+| YouTube Music | 9.15.51 / 9.20.53 / 9.30.53; 실험 9.42.52 / 9.43.51 / 9.44.52 |
++| YouTube | v2.2.0의 선언된 대상 중 20.47.62 이상; 더 오래된 버전은 WireGuard 설치를 건너뜀 |
++| YouTube Music | 9.15.51 / 9.20.53 / 9.30.53; 실험 9.43.51 / 9.44.52 / 9.45.51 |
 +| APK ABI | arm64-v8a, x86_64; 32비트 ABI를 포함한 APK와 root mount 설치 미지원 |
 +| 프로필 | 단일 Interface/Peer, UTF-8, 최대 64 KiB |
 +| Endpoint 및 DNS | 숫자 IP; DNS가 AllowedIPs 및 인터페이스 주소 계열과 일치해야 함 |
@@ -121,11 +135,11 @@ index 000000000..834c0fe7e
 +네이티브 payload는 Gradle의 `processResources` 전에 소스에서 자동으로 만듭니다.
 +Go 1.26.10, Android NDK 28.2.13676358, API 26이 필요합니다. 산출물은
 +`native/wireguard/build/android/<abi>/libmorphewireguard.so`와
-+`patches/build/libs/patches-2.1.5.mpp`입니다.
++`patches/build/libs/patches-2.2.0.mpp`입니다.
 +
 +최종 번들 생성 뒤 JVM/Android DEX 기본 선택을 모두 확인합니다.
 +`scripts/set-wireguard-defaults.py verify`는 검사용으로만 사용할 수 있습니다.
-+역사적인 v2.1.2 재패키징용 `repair`는 v2.1.5 빌드 경로가 아닙니다.
++역사적인 v2.1.2 재패키징용 `repair`는 v2.2.0 빌드 경로가 아닙니다.
 +
 +[네이티브 설명](native/wireguard/README.md)에 프로필 문법, Go/JNI 테스트 및
 +실패 정책을, [기기 체크리스트](docs/wireguard-device-acceptance.md)에 **예상 결과**와
@@ -145,16 +159,17 @@ index 000000000..834c0fe7e
 +YouTube APK, SDK/도구체인, 계정·개인키·실제 프로필은 배포하지 않습니다.
 diff --git a/build-support/PUBLIC_SOURCE_BUILD.md b/build-support/PUBLIC_SOURCE_BUILD.md
 new file mode 100644
-index 000000000..cf4e592b5
+index 000000000..0ac6a6ebb
 --- /dev/null
 +++ b/build-support/PUBLIC_SOURCE_BUILD.md
-@@ -0,0 +1,148 @@
+@@ -0,0 +1,149 @@
 +# Building the unofficial WireGuard bundle from source
 +
-+The v2.1.5 source retains Morphe Patches v2.1.0 at
-+`8fa2c7a1a832498de8f179748998a3ca87e198eb`. Only the WireGuard maintenance
-+changes from the contribution branch are backported. Existing unrelated patch
-+sources and their dependency declarations are preserved.
++The v2.2.0 source merges the official stable Morphe Patches v2.2.0 at
++`44031c561ea048c8f196877f30a49c13bfd6afb6`. The existing custom WireGuard implementation and localization fixes are retained.
++All patches and fixes from that stable base are included. The public library pin
++matches the official `2.2.0-dev.3` dependency; later unreleased patch commits are
++not included.
 +
 +Both native ABIs, Java/Kotlin extensions, and the Android patch DEX are built
 +from source. The build does not repair a previous release archive or modify
@@ -193,7 +208,7 @@ index 000000000..cf4e592b5
 +| Directory | Repository | Commit |
 +| --- | --- | --- |
 +| morphe-patches-gradle-plugin | MorpheApp/morphe-patches-gradle-plugin | 5b7e4619931a8c78b7858e598e002222d37021b9 |
-+| morphe-patches-library | MorpheApp/morphe-patches-library | 11f8c7e4d9dd64e18b0594d2c7cbf09176a65327 |
++| morphe-patches-library | MorpheApp/morphe-patches-library | 538d9a6574cbacb4ca66d8b687c44d93b2d8d470 |
 +| morphe-patcher | MorpheApp/morphe-patcher | d19545e8505e0329cc640723cb8ff91eddd3cd05 |
 +| ARSCLib | MorpheApp/ARSCLib | 675bed2de397097400ba6f0c808e28005ae5aa53 |
 +
@@ -270,7 +285,7 @@ index 000000000..cf4e592b5
 +Use actual paths for the bundle and installed Android SDK/NDK:
 +
 +```sh
-+wireguard_bundle=patches/build/libs/patches-2.1.5.mpp
++wireguard_bundle=patches/build/libs/patches-2.2.0.mpp
 +python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 +python3 scripts/verify-wireguard-bundle.py "$wireguard_bundle" \
 +  --dexdump "$ANDROID_HOME/build-tools/36.0.0/dexdump"
@@ -296,7 +311,7 @@ index 000000000..cf4e592b5
 +The checksums for the published release are in `RELEASE-SHA256SUMS.txt` in the
 +custom repository/release. Byte equality across other operating systems or NDK
 +host packages is not claimed. Do not run the historical artifact `repair`
-+subcommand to create v2.1.5; all release inputs come from this source build.
++subcommand to create v2.2.0; all release inputs come from this source build.
 diff --git a/build-support/public-plugin-optional-auth.patch b/build-support/public-plugin-optional-auth.patch
 new file mode 100644
 index 000000000..916c97d53
@@ -1090,7 +1105,7 @@ index 000000000..e92c4bc20
 +notices are retained. See [source build instructions](wireguard-source-build.md).
 diff --git a/docs/wireguard-i18n.md b/docs/wireguard-i18n.md
 new file mode 100644
-index 000000000..c458005d4
+index 000000000..c11de24fd
 --- /dev/null
 +++ b/docs/wireguard-i18n.md
 @@ -0,0 +1,64 @@
@@ -1121,7 +1136,7 @@ index 000000000..c458005d4
 +registration change is needed. Korean source resources use `values-ko-rKR` and
 +are copied into the target APK's `values-ko` configuration.
 +
-+The custom v2.1.4 distribution contains 60 English WireGuard strings plus
++The custom distribution contains 60 English WireGuard strings plus
 +complete manual translations for Korean, Japanese, simplified/traditional
 +Chinese, Spanish, French, German and Brazilian Portuguese. These custom-only
 +locale edits were explicitly authorized by the distributor. The official
@@ -1139,7 +1154,7 @@ index 000000000..c458005d4
 +compiled APK resources. Run the following after patching the target APKs:
 +
 +```sh
-+python3 scripts/verify-wireguard-locales.py patches/build/libs/patches-2.1.5.mpp \
++python3 scripts/verify-wireguard-locales.py patches/build/libs/patches-2.2.0.mpp \
 +  --aapt2 "$ANDROID_HOME/build-tools/36.0.0/aapt2" \
 +  --apk /path/to/patched-youtube.apk --apk /path/to/patched-music.apk \
 +  --output /path/to/compiled-locales.json
@@ -1516,16 +1531,17 @@ index 000000000..feda96617
 +treating the preview as reliable. This is not a system-wide VPN or kill switch.
 diff --git a/docs/wireguard-source-build.md b/docs/wireguard-source-build.md
 new file mode 100644
-index 000000000..bd7eb95a4
+index 000000000..6ea9d07d4
 --- /dev/null
 +++ b/docs/wireguard-source-build.md
-@@ -0,0 +1,148 @@
+@@ -0,0 +1,149 @@
 +# Building the unofficial WireGuard bundle from source
 +
-+The v2.1.5 source retains Morphe Patches v2.1.0 at
-+`8fa2c7a1a832498de8f179748998a3ca87e198eb`. Only the WireGuard maintenance
-+changes from the contribution branch are backported. Existing unrelated patch
-+sources and their dependency declarations are preserved.
++The v2.2.0 source merges the official stable Morphe Patches v2.2.0 at
++`44031c561ea048c8f196877f30a49c13bfd6afb6`. The existing custom WireGuard implementation and localization fixes are retained.
++All patches and fixes from that stable base are included. The public library pin
++matches the official `2.2.0-dev.3` dependency; later unreleased patch commits are
++not included.
 +
 +Both native ABIs, Java/Kotlin extensions, and the Android patch DEX are built
 +from source. The build does not repair a previous release archive or modify
@@ -1564,7 +1580,7 @@ index 000000000..bd7eb95a4
 +| Directory | Repository | Commit |
 +| --- | --- | --- |
 +| morphe-patches-gradle-plugin | MorpheApp/morphe-patches-gradle-plugin | 5b7e4619931a8c78b7858e598e002222d37021b9 |
-+| morphe-patches-library | MorpheApp/morphe-patches-library | 11f8c7e4d9dd64e18b0594d2c7cbf09176a65327 |
++| morphe-patches-library | MorpheApp/morphe-patches-library | 538d9a6574cbacb4ca66d8b687c44d93b2d8d470 |
 +| morphe-patcher | MorpheApp/morphe-patcher | d19545e8505e0329cc640723cb8ff91eddd3cd05 |
 +| ARSCLib | MorpheApp/ARSCLib | 675bed2de397097400ba6f0c808e28005ae5aa53 |
 +
@@ -1641,7 +1657,7 @@ index 000000000..bd7eb95a4
 +Use actual paths for the bundle and installed Android SDK/NDK:
 +
 +```sh
-+wireguard_bundle=patches/build/libs/patches-2.1.5.mpp
++wireguard_bundle=patches/build/libs/patches-2.2.0.mpp
 +python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 +python3 scripts/verify-wireguard-bundle.py "$wireguard_bundle" \
 +  --dexdump "$ANDROID_HOME/build-tools/36.0.0/dexdump"
@@ -1667,7 +1683,264 @@ index 000000000..bd7eb95a4
 +The checksums for the published release are in `RELEASE-SHA256SUMS.txt` in the
 +custom repository/release. Byte equality across other operating systems or NDK
 +host packages is not claimed. Do not run the historical artifact `repair`
-+subcommand to create v2.1.5; all release inputs come from this source build.
++subcommand to create v2.2.0; all release inputs come from this source build.
+diff --git a/docs/wireguard-upstream-2.2.0.md b/docs/wireguard-upstream-2.2.0.md
+new file mode 100644
+index 000000000..0e206852a
+--- /dev/null
++++ b/docs/wireguard-upstream-2.2.0.md
+@@ -0,0 +1,251 @@
++# WireGuard v2.2.0 stable upstream base update
++
++The custom distribution now uses the official Morphe Patches v2.2.0 stable tag
++at `44031c561ea048c8f196877f30a49c13bfd6afb6`, released on November 10, 2026.
++The previous custom v2.1.5 used Morphe v2.1.0 at
++`8fa2c7a1a832498de8f179748998a3ca87e198eb`. The official
++[release notes](https://github.com/MorpheApp/morphe-patches/releases/tag/v2.2.0)
++and [base comparison](https://github.com/MorpheApp/morphe-patches/compare/v2.1.0...v2.2.0)
++describe the upstream changes. Later unreleased `dev` work is not included.
++
++The separate official-contribution source branch and personal draft PR are
++unchanged by this custom release. Historical release files and test reports
++remain available; their results are not relabeled as new v2.2.0 tests.
++
++## Merge scope and preservation
++
++The update merges the stable upstream tag into the existing custom source,
++preserving the working WireGuard implementation. Upstream changes include
++YouTube player/playlist improvements, Music's glass navigation option, fixes,
++settings updates and new compatibility metadata.
++
++Official v2.1.0-to-v2.2.0 changes do not alter the existing Network proxy,
++Cronet transport/hooks or `BaseActivityHook` used by WireGuard. The custom
++WireGuard engine, JNI bridge, shared runtime, settings Activity, proxy failure
++policy and per-app patch declarations retain their v2.1.5 source behavior.
++No replacement VPN implementation or Android `VpnService` is introduced.
++
++The Music `RomanizationDict` import conflict is resolved by retaining both
++upstream's current download/cleanup code and the existing
++`Requester.openConnection` routing. The current Music connection sites use
++`Requester`/`LyricsRequests`; no new direct URL connection path is introduced
++by this merge. This source inspection does not establish coverage of every
++app-internal request or future code path.
++
++Preserved invariants:
++
++- Both WireGuard patches have `default = true`; the separate runtime setting
++  `morphe_wireguard_enabled` still defaults to `false`. Import alone does not
++  enable routing. Disabled routing starts no WireGuard engine.
++- Both apps retain their independent encrypted profile storage:
++  `morphe-wireguard-v1.bin` in `noBackupFilesDir`, AndroidKeyStore alias
++  `morphe.wireguard.profile.v1`, AES-GCM and the existing versioned format.
++- The app-local proxy remains authenticated. Intercepted requests have no
++  direct fallback on tunnel failure, and WireGuard routing disables QUIC for
++  its TCP proxy boundary.
++- The settings page retains its v2.1.5 Activity-local resource lookup. All 60
++  WireGuard strings are preserved in English and eight locale variants:
++  Korean, Japanese, simplified/traditional Chinese, Spanish, French, German
++  and Brazilian Portuguese. The 19 fixed native diagnostic codes still map to
++  localized resource keys; raw profile/backend text is not displayed.
++- Native support remains `arm64-v8a` and `x86_64`, Android API 26 or newer.
++  The supported profile subset and root-mount/32-bit restrictions remain.
++
++The custom translations remain maintainer-requested additions, not an official
++Crowdin export. The official contribution's English-source/Crowdin policy is
++separate from this distribution.
++
++## Build and source provenance
++
++| Item | Value |
++| --- | --- |
++| Bundle | `morphe-wireguard-youtube-music-preview-2.2.0.mpp` |
++| Bundle SHA-256 | `d10f3f8b2cc114a6d11e1e80d02b0fc435199839b7051b6a1768a481c3095bd3` |
++| Release code commit | `5f82429e47a7d0a29f7f3f61caab53b73fd49307` |
++| Source branch | `feat/wireguard-i18n-custom` |
++| Official stable base | `44031c561ea048c8f196877f30a49c13bfd6afb6` |
++| Morphe Gradle plugin | 2.1.0, unchanged |
++| Morphe Patcher | 2.3.0, unchanged |
++| Morphe patches/extensions library | 2.2.0-dev.3, as required by the stable upstream tag |
++| Native ABIs / minimum API | `arm64-v8a`, `x86_64` / 26 |
++| Tools | Wrapper Gradle 9.8.2, JDK 21, SDK/Build-Tools 36, Go 1.26.10, NDK 28.2.13676358 |
++
++The library's development-suffixed dependency version is part of the official
++stable v2.2.0 source. It does not mean this distribution follows a later
++Morphe Patches `dev` commit. The corresponding source archive contains exact
++public dependency snapshots and `SOURCE-PROVENANCE.json`; the pinned public
++source preparation helper matches those inputs. No compiled patch selection
++flags are rewritten, and no unrelated upstream patch is modified for the build.
++
++The final source ZIP provenance records the documentation/catalogue commit.
++The release code was tested at `5f82429e47a7d0a29f7f3f61caab53b73fd49307`;
++only documentation and the source-generated catalogue were finalized afterward.
++Application source, resources, build/dependency inputs and tested bundle bytes
++remain unchanged. The first full test attempt detected a stale expected Music
++experimental version (9.42.52); both metadata regression checks were updated to
++the official target 9.45.51, then the complete validation passed.
++
++The generated catalogue has 204 patches. All 202 official v2.2.0 entries match
++the official catalogue exactly; the two additional entries are the app-specific,
++default-selected WireGuard patches. No official patch metadata is removed or
++rewritten by this distribution.
++
++## Declared app targets
++
++This table records upstream compatibility metadata, not test execution.
++Recommended and experimental versions must be distinguished from the actual
++APK cases recorded below.
++
++| App | Recommended targets | Experimental targets |
++| --- | --- | --- |
++| YouTube | 21.30.216, 21.28.208, 21.23.492, 20.51.39, 20.26.46 | 21.45.82, 21.44.528, 21.43.523 |
++| YouTube Music | 9.30.53, 9.20.53, 9.15.51 | 9.45.51, 9.44.52, 9.43.51 |
++
++WireGuard's YouTube gate still requires 20.47.62 or newer. Of the declared
++recommended YouTube targets, 20.51.39 is therefore the oldest eligible one;
++20.26.46 intentionally skips the WireGuard patch with a warning. The general
++bundle's compatibility list must not be read as WireGuard support on that
++older target. Music's oldest declared target is 9.15.51. Minimum/maximum
++eligible recommended targets and latest experimental targets remain separate
++verification cases.
++
++## Executed verification
++
++Source build and regression results: **1,571 Java/Kotlin tests passed with 5 existing APK-dependent skips; Go race/vet, 80 host JNI checks, 41 Python tests and source-built bundle/DEX/native/resource checks passed**.
++
++APK patching, Desktop `--validate` and static inspection results:
++The following checks used the exact final source-built bundle. A focused
++selection means WireGuard and its declared dependencies; it does not imply
++full-default patching of unrelated features.
++
++| App/version | Selection | Desktop `--validate` / final APK inspection |
++| --- | --- | --- |
++| YouTube 20.51.39 | WireGuard-focused, minimum eligible declared target | Passed |
++| YouTube 21.30.216 | WireGuard-focused, latest recommended | Passed |
++| YouTube 21.30.216 | Full defaults | Failed: `Feed card layout`; official baseline reproduces this |
++| YouTube 21.30.216 | Defaults with only `Feed card layout` explicitly deselected | Passed |
++| YouTube 21.45.82 | WireGuard-focused, latest experimental | Passed |
++| YouTube 21.45.82 | Full defaults | Failed: same `Feed card layout` fingerprint |
++| Music 9.15.51 | WireGuard-focused, minimum declared target | Passed |
++| Music 9.30.53 | WireGuard-focused, latest recommended | Passed |
++| Music 9.30.53 | Full defaults | Passed |
++| Music 9.45.51 | WireGuard-focused, latest experimental | Passed |
++
++This is **8 successful custom APK outputs and 2 failed full-default YouTube
++runs**, plus the controlled official-bundle failure reproduction. The failed
++cases are not counted as passes. Each successful APK passed compiled native,
++manifest, resource, DEX/JNI and notice inspection. All 60 English values and
++60 values in each of eight locale configurations matched across the eight
++successful APKs: **4,320 comparisons passed**.
++
++Original Google signatures and ZIP CRC were verified. Universal YouTube inputs
++were explicitly derived to unsigned arm64-only fixtures; retained contents and
++package/version identity were verified. Music used original arm64 inputs. No
++compatibility force or continue-on-error flag was used. Final output APKs are
++unsigned host-validation artifacts, not release assets. x86_64 native payloads
++were inspected, but x86_64 target APK execution was not performed.
++
++Runtime results: **No new Android target-app or network execution; settings Activity/base hook and dependency locale lookup sources are unchanged from the historical API35/KVM 124-comparison UI cohort**.
++
++Record the exact source/bundle identity and target versions when reporting
++results. Resource/DEX/JNI/native inspections and successful Desktop validation
++are host evidence. They do not establish Android target-app launch, profile
++import, a remote handshake, playback or network leak behavior.
++
++Historical v2.1.5 verification included four focused/default APK cases on
++YouTube 21.30.216 and Music 9.30.53 and 2,160 compiled resource comparisons.
++Its standalone API 35/x86_64 settings Activity harness passed 124 comparisons
++with explicit backend stubs. Those results remain in the
++[v2.1.5 report](wireguard-i18n-2.1.5.md); they are not newly executed v2.2.0
++target-app tests.
++
++
++Successful unsigned test APK SHA-256 values:
++
++| App/version | Selection | SHA-256 |
++| --- | --- | --- |
++| 21.30.216 | focused | `991a5d0f1ae9a9489282621506b5673edb10964832f3378d11dd0be33146dded` |
++| 9.30.53 | focused | `ac95f9410aaa13122aa64b7b4cba3e3b3d0fb4dec779fcca6dc7e81e215dac91` |
++| 9.30.53 | defaults | `5543da602b29901899eb730c1a9dd1e73fb5475ce1c6c04d762b04b0da4ed5b6` |
++| 20.51.39 | focused | `4ff558f1eb36fc8e3cac5fd36a766ead78e402729acbd811105c4bda5f7ca327` |
++| 9.15.51 | focused | `6fd2b251e07ba68e9be9c2ef2e318eea979492cb367c922012c87343060cb010` |
++| 21.45.82 | focused | `2f6f5cb46954eae022c02ba85ee622b2130b530233dfaf85b810e89a8696cd73` |
++| 9.45.51 | focused | `39e827f60dcf78012c3e8dce3baa217177ce59b5faf5234bb603fc1bee20ece9` |
++| YouTube 21.30.216 | Defaults minus Feed card layout | `6fb8232fd1f814d68d4760f3055be73b9271b47321d688bb81253de9082039ce` |
++
++## Reproduced official selection failure
++
++Full-default YouTube patching failed at `Feed card layout`, specifically
++`app.morphe.patches.youtube.shared.EngagementPanelControllerFingerprint` at
++`FeedCardLayoutPatch.kt:197`. This happened for custom 21.30.216 and 21.45.82.
++A controlled 21.30.216 baseline used the exact official v2.2.0 bundle, SHA-256
++`6ca368de24d475404257611cf03c2a82062a00ab9d60ddd220badaa332a68f2e`, with the
++same derived ABI-only input, Desktop 2.1.1 (the latest stable Desktop at test
++time), JDK 21 and no compatibility-force/continue-on-error flags. It failed at
++the same patch and fingerprint. Failure detail matched after normalizing only
++Java object identity suffixes. Input and bundle hashes stayed unchanged.
++
++This is an observed failure shared with the official bundle in this host
++validation cohort. It is not evidence that every Manager/device execution fails.
++WireGuard sources do not modify the affected upstream files. The custom release
++keeps all official patches and defaults; `Feed card layout` is not silently
++removed, disabled in metadata or rewritten. A separate, explicitly labeled
++selection test deselects that patch. Full-default YouTube runs remain recorded
++as failed, irrespective of the alternate selection result.
++
++## Unverified behavior and expected device procedure
++
++Unrun app versions, ABI/runtime cases and checks must stay marked unverified.
++In particular, a compatibility declaration does not establish that a new
++experimental APK was available for validation. The maintainer's successful
++v2.1.1 physical-device use is separate historical evidence.
++
++The following device procedure records expected results until performed on
++the actual patched YouTube and Music apps:
++
++1. Refresh the custom source and patch/install each app using the new bundle.
++   Expected: settings opens with the WireGuard entry, while a clean install
++   has routing disabled and starts no WireGuard network work.
++2. Upgrade an existing installation without clearing its data. Expected: its
++   saved profile and explicit enablement state remain accessible through the
++   unchanged encrypted format/key alias. Do not publish profile contents.
++3. Import a supported test profile and explicitly enable/restart. Expected:
++   intercepted traffic reaches the WireGuard server; independently observe a
++   server handshake, DNS path and media playback.
++4. Make the endpoint unreachable. Expected: intercepted requests fail without
++   direct fallback. Check actual traffic; requests outside the hooks are not
++   covered by this expected result.
++5. Change Wi-Fi/mobile networks, restart each app, run both concurrently and
++   check the reported system WireGuard coexistence scenario. Record actual
++   results instead of assuming success from static inspection.
++6. Repeat supported Morphe/Android locales. Expected: entry and internal
++   titles, rows, status, dialogs and toasts follow the settings Activity's
++   locale after the documented restart.
++
++Target-app text layout, document-picker grants, AndroidKeyStore integration,
++live handshake, playback, DNS/leak measurements, reconnection, resource usage
++and concurrent app/process behavior still require device evidence. The full
++[device acceptance checklist](wireguard-device-acceptance.md) remains useful.
++
++## Security and licensing boundaries
++
++This feature tunnels only requests intercepted by the authenticated app-local
++HTTP proxy through a userspace WireGuard stack. It does not register Android
++`VpnService`, use root, occupy the system VPN slot, or provide a system-wide
++VPN/complete kill switch. Local proxy readiness does not establish a remote
++handshake or Internet access. Unhooked paths and other processes are outside
++the coverage claim.
++
++Profiles still require one interface/peer, UTF-8 text of at most 64 KiB, a
++numeric endpoint and numeric DNS covered by `AllowedIPs` and an interface
++address family. Hostname endpoints, DNS search domains, shell hooks and
++routing-table options remain unsupported. The previously reported import and
++system WireGuard coexistence failures have not been reproduced on those
++users' devices; this base update does not claim they are fixed.
++
++Original GPL-3.0/NOTICE terms, external dependency sources, licenses and
++copyright notices remain preserved and accessible in the app. The release
++contains no proprietary target APKs, personal profiles, private keys, account
++credentials or signing secrets. ARSCLib's dependency-owned AOSP framework and
++test APK resources remain with its corresponding source/license. The bundle
++is unsigned. See [source build instructions](wireguard-source-build.md).
 diff --git a/docs/wireguard-verification.md b/docs/wireguard-verification.md
 new file mode 100644
 index 000000000..dd8c3c1f8
@@ -1903,7 +2176,7 @@ index 1fcb66328..421f07313 100644
          connection.setReadTimeout(15_000);
  
 diff --git a/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/derive/OpenAIClient.java b/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/derive/OpenAIClient.java
-index 81799d3c1..e8ac06687 100644
+index 5a8a2f982..b1ebe33de 100644
 --- a/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/derive/OpenAIClient.java
 +++ b/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/derive/OpenAIClient.java
 @@ -29,6 +29,7 @@ import java.util.regex.Pattern;
@@ -1964,7 +2237,7 @@ index 7222ffbb3..6e95b1936 100644
              conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
              conn.setReadTimeout(READ_TIMEOUT_MS);
 diff --git a/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/model/MetadataCleaner.java b/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/model/MetadataCleaner.java
-index 723442705..2ecf7def5 100644
+index 8fe08a7ad..eb88ac3da 100644
 --- a/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/model/MetadataCleaner.java
 +++ b/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/model/MetadataCleaner.java
 @@ -14,7 +14,6 @@ import java.io.BufferedReader;
@@ -1976,8 +2249,8 @@ index 723442705..2ecf7def5 100644
  import java.util.List;
  import java.util.concurrent.ConcurrentHashMap;
 @@ -28,6 +27,7 @@ import java.util.regex.Pattern;
- import app.morphe.extension.music.patches.lyrics.parsers.CharactersConverter;
  import app.morphe.extension.music.patches.lyrics.requests.LyricsRequests;
+ import app.morphe.extension.music.patches.lyrics.utils.CharactersConverter;
  import app.morphe.extension.shared.Logger;
 +import app.morphe.extension.shared.requests.Requester;
  
@@ -2006,7 +2279,7 @@ index 964cffbf0..0c0a6f566 100644
              connection.setRequestProperty("User-Agent", userAgent);
              connection.setRequestProperty("Accept", "*/*");
 diff --git a/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/requests/LyricifyProvider.java b/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/requests/LyricifyProvider.java
-index b5a55afa8..dd90a4989 100644
+index 081287ae1..eb7852fff 100644
 --- a/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/requests/LyricifyProvider.java
 +++ b/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/requests/LyricifyProvider.java
 @@ -31,6 +31,7 @@ import app.morphe.extension.music.patches.lyrics.model.LyricsLine;
@@ -2090,24 +2363,21 @@ index a717e77c7..986fbaa9e 100644
              connection.setConnectTimeout(5000);
              connection.setReadTimeout(8000);
 diff --git a/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/romanizers/RomanizationDict.java b/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/romanizers/RomanizationDict.java
-index 7ecb04247..029f8e7d2 100644
+index b21410ad4..6348e7b39 100644
 --- a/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/romanizers/RomanizationDict.java
 +++ b/extensions/music/src/main/java/app/morphe/extension/music/patches/lyrics/romanizers/RomanizationDict.java
-@@ -16,12 +16,12 @@ import java.io.IOException;
+@@ -16,9 +16,9 @@ import java.io.IOException;
  import java.io.InputStream;
  import java.io.OutputStream;
  import java.net.HttpURLConnection;
 -import java.net.URL;
- import java.nio.charset.StandardCharsets;
- import java.nio.file.Files;
  
  import app.morphe.extension.music.patches.lyrics.LyricsDirectories;
- import app.morphe.extension.shared.Logger;
 +import app.morphe.extension.shared.requests.Requester;
  
  /**
   * What the two reading dictionaries have in common: how they are fetched and how the settings row
-@@ -63,7 +63,7 @@ public final class RomanizationDict {
+@@ -60,7 +60,7 @@ public final class RomanizationDict {
          File partial = new File(target.getPath() + DOWNLOAD_SUFFIX);
          HttpURLConnection connection = null;
          try {
@@ -2243,10 +2513,10 @@ index da57bbaca..e719b4eb6 100644
              return null;
          }
 diff --git a/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/settings/SharedYouTubeSettings.java b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/settings/SharedYouTubeSettings.java
-index 250268a18..d0284bf1c 100644
+index 21bbca391..a6f546a93 100644
 --- a/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/settings/SharedYouTubeSettings.java
 +++ b/extensions/shared-youtube/library/src/main/java/app/morphe/extension/shared/settings/SharedYouTubeSettings.java
-@@ -56,6 +56,10 @@ public class SharedYouTubeSettings extends BaseSettings {
+@@ -57,6 +57,10 @@ public class SharedYouTubeSettings extends BaseSettings {
      public static final StringSetting PROXY_AUTH_PASSWORD = new StringSetting("morphe_proxy_auth_password", "", true, false, null, parent(PROXY_AUTH_ENABLED));
      public static final BooleanSetting PROXY_ALLOW_DIRECT_FALLBACK = new BooleanSetting("morphe_proxy_allow_direct_fallback", FALSE, true, parent(PROXY_ENABLED));
  
@@ -4751,16 +5021,6 @@ index 0cde5caa1..152043b35 100644
 +        public abstract Builder enableQuic(boolean value);
      }
  }
-diff --git a/gradle.properties b/gradle.properties
-index 78ed265f3..4466ab11a 100644
---- a/gradle.properties
-+++ b/gradle.properties
-@@ -5,4 +5,4 @@ android.useAndroidX = true
- kotlin.code.style = official
- # Extensions are Java only. Prevents adding the Kotlin stdlib.
- kotlin.stdlib.default.dependency = false
--version = 2.1.0
-+version = 2.1.5
 diff --git a/native/wireguard/.gitignore b/native/wireguard/.gitignore
 new file mode 100644
 index 000000000..79d701b89
@@ -8624,6 +8884,163 @@ index 000000000..c19af23ce
 +    except (ValueError, OSError, struct.error) as error:
 +        parser.exit(1, f"Android ELF verification failed: {error}\n")
 +    print(f"Android ELF verified: {args.abi}, ELF64, 16 KiB pages, NX stack, RELRO/NOW")
+diff --git a/patches-list.json b/patches-list.json
+index 287493f72..88a531f38 100644
+--- a/patches-list.json
++++ b/patches-list.json
+@@ -14702,6 +14702,150 @@
+         }
+       ],
+       "options": []
++    },
++    {
++      "name": "WireGuard proxy (experimental)",
++      "description": "Imports a WireGuard configuration and routes supported app requests through an authenticated app-local proxy, without Android VPN permission. Targets the YouTube Music versions listed in this bundle and requires a 64-bit APK. Root mounting is not supported. This is an unofficial, unverified-on-device prototype, not a system-wide VPN or kill switch.",
++      "default": true,
++      "category": null,
++      "compatiblePackages": [
++        {
++          "packageName": "com.google.android.apps.youtube.music",
++          "name": "YouTube Music",
++          "description": null,
++          "apkFileType": "APK_REQUIRED",
++          "appIconColor": "#FF0000",
++          "signatures": [
++            "6a2f65ec694a6a632acdcb5080912a565f903d4b8d83f0eb8e44fbdf2660d8e1",
++            "a2a1ad7ba7f41dfca4514e2afeb90691719af6d0fdbed4b09bbf0ed897701ceb"
++          ],
++          "formFactor": "MOBILE",
++          "targets": [
++            {
++              "version": "9.45.51",
++              "versionCodes": null,
++              "isExperimental": true,
++              "minSdk": 26,
++              "description": null
++            },
++            {
++              "version": "9.44.52",
++              "versionCodes": null,
++              "isExperimental": true,
++              "minSdk": 26,
++              "description": null
++            },
++            {
++              "version": "9.43.51",
++              "versionCodes": null,
++              "isExperimental": true,
++              "minSdk": 26,
++              "description": null
++            },
++            {
++              "version": "9.30.53",
++              "versionCodes": null,
++              "isExperimental": false,
++              "minSdk": 26,
++              "description": null
++            },
++            {
++              "version": "9.20.53",
++              "versionCodes": null,
++              "isExperimental": false,
++              "minSdk": 26,
++              "description": null
++            },
++            {
++              "version": "9.15.51",
++              "versionCodes": null,
++              "isExperimental": false,
++              "minSdk": 26,
++              "description": null
++            }
++          ]
++        }
++      ],
++      "options": []
++    },
++    {
++      "name": "WireGuard proxy (experimental)",
++      "description": "Imports a WireGuard configuration and routes supported app requests through an authenticated app-local proxy, without Android VPN permission. Requires a 64-bit YouTube 20.47.62 or newer APK. Root mounting is not supported. This is an unofficial, unverified-on-device prototype, not a system-wide VPN or kill switch.",
++      "default": true,
++      "category": null,
++      "compatiblePackages": [
++        {
++          "packageName": "com.google.android.youtube",
++          "name": "YouTube",
++          "description": null,
++          "apkFileType": "APK_REQUIRED",
++          "appIconColor": "#FF0033",
++          "signatures": [
++            "5aad2bee6db95d17e05a08d7d1e64c10a1511879154483916b6ae6c7fd9cb0c6",
++            "3d7a1223019aa39d9ea0e3436ab7c0896bfb4fb679f4de5fe7c23f326c8f994a"
++          ],
++          "formFactor": "MOBILE",
++          "targets": [
++            {
++              "version": "21.45.82",
++              "versionCodes": null,
++              "isExperimental": true,
++              "minSdk": 29,
++              "description": null
++            },
++            {
++              "version": "21.44.528",
++              "versionCodes": null,
++              "isExperimental": true,
++              "minSdk": 29,
++              "description": null
++            },
++            {
++              "version": "21.43.523",
++              "versionCodes": null,
++              "isExperimental": true,
++              "minSdk": 29,
++              "description": null
++            },
++            {
++              "version": "21.30.216",
++              "versionCodes": null,
++              "isExperimental": false,
++              "minSdk": 29,
++              "description": null
++            },
++            {
++              "version": "21.28.208",
++              "versionCodes": null,
++              "isExperimental": false,
++              "minSdk": 29,
++              "description": null
++            },
++            {
++              "version": "21.23.492",
++              "versionCodes": null,
++              "isExperimental": false,
++              "minSdk": 28,
++              "description": null
++            },
++            {
++              "version": "20.51.39",
++              "versionCodes": null,
++              "isExperimental": false,
++              "minSdk": 28,
++              "description": null
++            },
++            {
++              "version": "20.26.46",
++              "versionCodes": null,
++              "isExperimental": false,
++              "minSdk": 26,
++              "description": null
++            }
++          ]
++        }
++      ],
++      "options": []
+     }
+   ]
+-}
++}
+\ No newline at end of file
 diff --git a/patches/build.gradle.kts b/patches/build.gradle.kts
 index 9f94115a4..feeea95c4 100644
 --- a/patches/build.gradle.kts
@@ -8942,12 +9359,12 @@ index 000000000..76d7bd5bc
 +    }
 +}
 diff --git a/patches/src/main/resources/addresources/values-de-rDE/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-de-rDE/shared-youtube/strings.xml
-index 857143a9e..fd437543a 100644
+index 61d624a8d..9248fd092 100644
 --- a/patches/src/main/resources/addresources/values-de-rDE/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values-de-rDE/shared-youtube/strings.xml
-@@ -316,4 +316,65 @@ Die ID des Videos, das du dir ansiehst, wird an die Return YouTube Dislike-API g
+@@ -318,4 +318,65 @@ Die ID des Videos, das du dir ansiehst, wird an die Return YouTube Dislike-API g
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">Keine Client-Ratenbegrenzungen festgestellt</string>
-   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">Client-Ratenbegrenzung %s-mal encountered</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">Client-Ratenbegrenzung %s-mal aufgetreten</string>
    <string name="morphe_ryd_statistics_millisecond_text">%s Millisekunden</string>
 +  <!-- misc.wireguard.wireGuardProxyPatch: custom distribution translations -->
 +  <string name="morphe_wireguard_settings_title">WireGuard-Proxy</string>
@@ -9012,10 +9429,10 @@ index 857143a9e..fd437543a 100644
 +  <string name="morphe_wireguard_licenses_failed">Die Open-Source-Lizenzen konnten nicht geladen werden.</string>
  </resources>
 diff --git a/patches/src/main/resources/addresources/values-es-rES/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-es-rES/shared-youtube/strings.xml
-index e612fa109..263be8cc6 100644
+index f3dfd7c13..351038f80 100644
 --- a/patches/src/main/resources/addresources/values-es-rES/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values-es-rES/shared-youtube/strings.xml
-@@ -316,4 +316,66 @@ El ID del video que ves se envía a la API de Return YouTube Dislike, y tus me g
+@@ -318,4 +318,66 @@ El ID del vídeo que ves se envía a la API de Return YouTube Dislike, y tus me
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">No se alcanzó ningún límite para el cliente</string>
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">Se alcanzó el límite para el cliente %s veces</string>
    <string name="morphe_ryd_statistics_millisecond_text">%s milisegundos</string>
@@ -9083,10 +9500,10 @@ index e612fa109..263be8cc6 100644
 +  <string name="morphe_wireguard_licenses_failed">No se pudieron cargar las licencias de código abierto.</string>
  </resources>
 diff --git a/patches/src/main/resources/addresources/values-fr-rFR/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-fr-rFR/shared-youtube/strings.xml
-index c414babda..89c020824 100644
+index 2d6cb5b8a..96fce9ff6 100644
 --- a/patches/src/main/resources/addresources/values-fr-rFR/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values-fr-rFR/shared-youtube/strings.xml
-@@ -316,4 +316,65 @@ L'identifiant de la vidéo que vous regardez est envoyé à l'API de Return YouT
+@@ -318,4 +318,65 @@ L'identifiant de la vidéo que vous regardez est envoyé à l'API de Return YouT
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">Aucune limite de débit du client n\'a été atteinte</string>
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">La limite de débit du client a été atteinte %s fois</string>
    <string name="morphe_ryd_statistics_millisecond_text">%s millisecondes</string>
@@ -9153,10 +9570,10 @@ index c414babda..89c020824 100644
 +  <string name="morphe_wireguard_licenses_failed">Les licences open source n\'ont pas pu être chargées.</string>
  </resources>
 diff --git a/patches/src/main/resources/addresources/values-ja-rJP/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-ja-rJP/shared-youtube/strings.xml
-index 4eb0fa019..8ca027f81 100644
+index 92ee41406..bd4318635 100644
 --- a/patches/src/main/resources/addresources/values-ja-rJP/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values-ja-rJP/shared-youtube/strings.xml
-@@ -316,4 +316,65 @@ YouTube Premium を利用している場合、この設定は必要ない可能
+@@ -318,4 +318,65 @@ YouTube Premium を利用している場合、この設定は必要ない可能
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">クライアントのレート制限は発生していません</string>
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">クライアントのレート制限は %s 回発生しました</string>
    <string name="morphe_ryd_statistics_millisecond_text">%s ミリ秒</string>
@@ -9223,10 +9640,10 @@ index 4eb0fa019..8ca027f81 100644
 +  <string name="morphe_wireguard_licenses_failed">オープンソースライセンスを読み込めませんでした。</string>
  </resources>
 diff --git a/patches/src/main/resources/addresources/values-ko-rKR/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-ko-rKR/shared-youtube/strings.xml
-index 9a8303ead..c05c80b8c 100644
+index e2bdfd5d0..56248b53d 100644
 --- a/patches/src/main/resources/addresources/values-ko-rKR/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values-ko-rKR/shared-youtube/strings.xml
-@@ -316,4 +316,66 @@ PotHelper를 다운로드하려면 여기를 탭하세요"</string>
+@@ -318,4 +318,66 @@ PotHelper를 다운로드하려면 여기를 탭하세요"</string>
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">클라이언트 비율 제한이 발생하지 않았습니다</string>
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">클라이언트 비율 제한이 %s 번 발생하였습니다</string>
    <string name="morphe_ryd_statistics_millisecond_text">%s 밀리초</string>
@@ -9294,10 +9711,10 @@ index 9a8303ead..c05c80b8c 100644
 +  <string name="morphe_wireguard_licenses_failed">오픈소스 라이선스를 불러오지 못했습니다.</string>
  </resources>
 diff --git a/patches/src/main/resources/addresources/values-pt-rBR/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-pt-rBR/shared-youtube/strings.xml
-index 8c28d4ed3..f730dfcb9 100644
+index 6d60bb67e..6298f20a6 100644
 --- a/patches/src/main/resources/addresources/values-pt-rBR/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values-pt-rBR/shared-youtube/strings.xml
-@@ -316,4 +316,66 @@ O ID do vídeo que você assiste é enviado para a API do Return YouTube Dislike
+@@ -318,4 +318,66 @@ O ID do vídeo que você assiste é enviado para a API do Return YouTube Dislike
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">Nenhum limite de taxa do cliente encontrado</string>
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">Limite de taxa do cliente atingido %s vezes</string>
    <string name="morphe_ryd_statistics_millisecond_text">%s milisegundos</string>
@@ -9365,10 +9782,10 @@ index 8c28d4ed3..f730dfcb9 100644
 +  <string name="morphe_wireguard_licenses_failed">Não foi possível carregar as licenças de código aberto.</string>
  </resources>
 diff --git a/patches/src/main/resources/addresources/values-zh-rCN/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-zh-rCN/shared-youtube/strings.xml
-index 948a0df15..0d09597e4 100644
+index e9d2484b4..e9681658c 100644
 --- a/patches/src/main/resources/addresources/values-zh-rCN/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values-zh-rCN/shared-youtube/strings.xml
-@@ -316,4 +316,65 @@ Second \"item\" text"</string>
+@@ -318,4 +318,65 @@ Second \"item\" text"</string>
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">未遇到客户端速率限制</string>
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">遇到客户端速率限制 %s 次</string>
    <string name="morphe_ryd_statistics_millisecond_text">%s 毫秒</string>
@@ -9435,11 +9852,11 @@ index 948a0df15..0d09597e4 100644
 +  <string name="morphe_wireguard_licenses_failed">无法加载开源许可证。</string>
  </resources>
 diff --git a/patches/src/main/resources/addresources/values-zh-rTW/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values-zh-rTW/shared-youtube/strings.xml
-index 743acd47d..04da26880 100644
+index 5de8bd15d..7494f65d0 100644
 --- a/patches/src/main/resources/addresources/values-zh-rTW/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values-zh-rTW/shared-youtube/strings.xml
-@@ -316,4 +316,65 @@ If later turned off, it is recommended to clear the app data to prevent UI bugs"
-   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">未遭遇客戶端速率限制</string>
+@@ -318,4 +318,65 @@ Second \"item\" text"</string>
+   <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_zero_summary">未遭遇用戶端速率限制</string>
    <string name="morphe_ryd_statistics_getNumberOfRateLimitRequestsEncountered_non_zero_summary">遭遇用戶端速率限制 %s 次</string>
    <string name="morphe_ryd_statistics_millisecond_text">%s 毫秒</string>
 +  <!-- misc.wireguard.wireGuardProxyPatch (custom distribution translations) -->
@@ -9505,7 +9922,7 @@ index 743acd47d..04da26880 100644
 +  <string name="morphe_wireguard_licenses_failed">無法載入開放原始碼授權。</string>
  </resources>
 diff --git a/patches/src/main/resources/addresources/values/shared-youtube/strings.xml b/patches/src/main/resources/addresources/values/shared-youtube/strings.xml
-index 506985d02..6e5b39636 100644
+index b57471d1c..d2ea7e9b8 100644
 --- a/patches/src/main/resources/addresources/values/shared-youtube/strings.xml
 +++ b/patches/src/main/resources/addresources/values/shared-youtube/strings.xml
 @@ -192,6 +192,68 @@ To sign in, press continue below"</string>
@@ -9645,7 +10062,7 @@ index 000000000..8686cdf37
 +}
 diff --git a/patches/src/test/kotlin/app/morphe/patches/shared/misc/wireguard/WireGuardPatchMetadataTest.kt b/patches/src/test/kotlin/app/morphe/patches/shared/misc/wireguard/WireGuardPatchMetadataTest.kt
 new file mode 100644
-index 000000000..579a19ef8
+index 000000000..41d4850e1
 --- /dev/null
 +++ b/patches/src/test/kotlin/app/morphe/patches/shared/misc/wireguard/WireGuardPatchMetadataTest.kt
 @@ -0,0 +1,36 @@
@@ -9680,7 +10097,7 @@ index 000000000..579a19ef8
 +        assertEquals("com.google.android.apps.youtube.music", music.packageName)
 +        assertEquals(setOf("9.15.51", "9.20.53", "9.30.53"),
 +            music.targets.filterNot { it.isExperimental }.map { it.version }.toSet())
-+        assertEquals(setOf("9.42.52", "9.43.51", "9.44.52"),
++        assertEquals(setOf("9.43.51", "9.44.52", "9.45.51"),
 +            music.targets.filter { it.isExperimental }.map { it.version }.toSet())
 +        assertEquals(setOf(26), music.targets.map { it.minSdk }.toSet())
 +    }
@@ -9784,7 +10201,7 @@ index 000000000..d45b94fba
 +echo "Build the .mpp with the repository Gradle buildAndroid task next."
 diff --git a/scripts/prepare-wireguard-public-sources.py b/scripts/prepare-wireguard-public-sources.py
 new file mode 100644
-index 000000000..ae96f905e
+index 000000000..235c8a2fe
 --- /dev/null
 +++ b/scripts/prepare-wireguard-public-sources.py
 @@ -0,0 +1,44 @@
@@ -9798,7 +10215,7 @@ index 000000000..ae96f905e
 +
 +SOURCES = {
 +    "morphe-patches-gradle-plugin": "5b7e4619931a8c78b7858e598e002222d37021b9",
-+    "morphe-patches-library": "11f8c7e4d9dd64e18b0594d2c7cbf09176a65327",
++    "morphe-patches-library": "538d9a6574cbacb4ca66d8b687c44d93b2d8d470",
 +    "morphe-patcher": "d19545e8505e0329cc640723cb8ff91eddd3cd05",
 +    "ARSCLib": "675bed2de397097400ba6f0c808e28005ae5aa53",
 +}
@@ -11727,7 +12144,7 @@ index 000000000..56e2c277e
 +}
 diff --git a/tests/wireguard-bundle/WireGuardBundleSmoke.java b/tests/wireguard-bundle/WireGuardBundleSmoke.java
 new file mode 100644
-index 000000000..9084106ae
+index 000000000..549718f48
 --- /dev/null
 +++ b/tests/wireguard-bundle/WireGuardBundleSmoke.java
 @@ -0,0 +1,63 @@
@@ -11785,7 +12202,7 @@ index 000000000..9084106ae
 +                .getCompatibility().get(0);
 +        Set<String> musicVersions = new HashSet<>();
 +        music.getTargets().forEach(target -> musicVersions.add(target.getVersion()));
-+        if (!musicVersions.equals(Set.of("9.15.51", "9.20.53", "9.30.53", "9.42.52", "9.43.51", "9.44.52"))) {
++        if (!musicVersions.equals(Set.of("9.15.51", "9.20.53", "9.30.53", "9.43.51", "9.44.52", "9.45.51"))) {
 +            throw new AssertionError("Unexpected Music compatibility targets: " + musicVersions);
 +        }
 +        System.out.println("PASS real Morphe JAR loader: " + patches.size() + " patches discovered");

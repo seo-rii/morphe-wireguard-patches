@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-09T21:10:42",
-  "description": "Unofficial app-local WireGuard proxy patches for YouTube and YouTube Music. v2.1.5 fixes internal settings language lookup and retains eight custom locale variants. Routing remains off until profile import and explicit enablement. Only intercepted requests are covered; target-app device acceptance remains unverified.",
-  "download_url": "https://github.com/seo-rii/morphe-wireguard-patches/releases/download/v2.1.5/morphe-wireguard-youtube-music-preview-2.1.5.mpp",
+  "created_at": "2026-11-13T21:34:24",
+  "description": "Unofficial Morphe v2.2.0 with app-local WireGuard for YouTube and Music; existing profiles and eight locales retained. Routing defaults off. YouTube: deselect Feed card layout when patching (same failure reproduced with official v2.2.0). Only intercepted requests are tunneled; device/network acceptance remains unverified.",
+  "download_url": "https://github.com/seo-rii/morphe-wireguard-patches/releases/download/v2.2.0/morphe-wireguard-youtube-music-preview-2.2.0.mpp",
   "signature_download_url": "",
-  "version": "2.1.5"
+  "version": "2.2.0"
 }

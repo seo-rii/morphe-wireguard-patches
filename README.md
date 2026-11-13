@@ -1,9 +1,17 @@
 # Unofficial app-local WireGuard patches for Morphe
 
 **Independent, experimental build. Not affiliated with MorpheApp or Proton.**
-The [v2.1.5 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.5)
+The [v2.2.0 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.2.0)
 provides app-local WireGuard proxy patches for YouTube and YouTube Music,
-retaining the Morphe Patches v2.1.0 base and its other patches.
+updated to the official Morphe Patches v2.2.0 stable base and its other patches.
+
+**Known v2.2.0 selection issue:** YouTube 21.30.216 and 21.45.82 fail full-default
+Desktop validation in `Feed card layout` (`EngagementPanelControllerFingerprint`).
+The exact official v2.2.0 bundle reproduces the same 21.30.216 failure with the
+same verified input. WireGuard-focused patching passes. The release retains the
+official patch/default metadata; this limitation is not hidden by removing a patch.
+Explicitly deselect `Feed card layout` when patching these YouTube versions.
+The tested selection details are recorded below.
 
 ## Add this source in Morphe
 
@@ -20,46 +28,47 @@ The bundle includes the other patches from its upstream base, so choose **one
 patch source per app** instead of combining it with official Morphe patches.
 After updating this source, patch and install the app again to receive changes.
 
-## Changes in v2.1.5
+## Changes in v2.2.0
 
-- Fix the internal WireGuard settings page resolving strings from a global
-  context/cache while its entry menu used the localized settings context.
-  Titles, preference rows, status text, dialogs and toasts now resolve resources
-  through the WireGuard settings Activity itself.
-- Keep the existing Morphe language context and restart behavior. All 60 strings
-  remain translated for Korean, Japanese, simplified/traditional Chinese,
-  Spanish, French, German and Brazilian Portuguese, with English fallback.
-- Keep the 19 fixed native diagnostic codes, transport, encrypted profile
-  format/key alias, connection default-off policy and patch default selection.
-  License and copyright notices remain verbatim.
+- Update the upstream base from Morphe Patches v2.1.0 to the official
+  [v2.2.0 stable release](https://github.com/MorpheApp/morphe-patches/releases/tag/v2.2.0).
+  This includes the new upstream YouTube player/playlist features, Music glass
+  navigation option, fixes and refreshed app compatibility metadata.
+- Retain the existing WireGuard transport, profile import diagnostics,
+  encrypted profile format/key alias, app settings UI and internal settings
+  localization fix from v2.1.5. The engine and its profile subset are unchanged.
+- Keep all 60 WireGuard strings in Korean, Japanese, simplified/traditional
+  Chinese, Spanish, French, German and Brazilian Portuguese, with English
+  fallback. Both patches remain selected by default, with routing off until
+  explicit user enablement.
 
+This update uses the stable v2.2.0 tag, without later unreleased `dev` changes.
 The translations remain custom-distribution additions requested by the
-maintainer, not an official Crowdin export. The upstream contribution retains
-English source resources and the Crowdin translation workflow. Existing
-[v2.1.3 maintenance fixes](docs/wireguard-maintenance-2.1.3.md) and
-[v2.1.4 translations](docs/wireguard-i18n-2.1.4.md) remain included. Earlier
-releases are preserved.
+maintainer, not an official Crowdin export. The separate upstream contribution
+and personal draft PR are unchanged by this release. Existing
+[v2.1.3 maintenance fixes](docs/wireguard-maintenance-2.1.3.md),
+[v2.1.4 translations](docs/wireguard-i18n-2.1.4.md) and the
+[v2.1.5 internal localization fix](docs/wireguard-i18n-2.1.5.md) remain included.
+Earlier releases and their verification reports are preserved.
 
 ## Verification status
 
-- Final source build and regression checks: **64 affected Java tests per source tree plus source bundle/DEX/JNI/resource/native checks passed**.
-- Final APK patching/resource inspection: **YouTube 21.30.216 and Music 9.30.53 passed four focused/default Desktop --validate cases; all 2,160 compiled resource values matched**.
-- Standalone Android settings Activity runtime checks:
-  **four pre-fix failures reproduced; four fixed scenarios passed all 124 comparisons on API35/x86_64 KVM, using real Activity/widgets and explicit backend stubs**.
+- Source build and regression checks: **1,571 Java/Kotlin tests passed with 5 existing APK-dependent skips; Go race/vet, 80 host JNI checks, 41 Python tests and source-built bundle/DEX/native/resource checks passed**.
+- APK patching and inspection: **8 custom APK patch/--validate/static inspections passed, including minimum/latest recommended and latest experimental targets; 4,320 compiled locale values matched. Full-default YouTube 21.30.216/21.45.82 failed at Feed card layout; the official bundle reproduces the same 21.30.216 failure, and an explicitly deselected-Feed-card 21.30.216 selection passed**.
+- Runtime checks: **No new Android target-app or network execution; settings Activity/base hook and dependency locale lookup sources are unchanged from the historical API35/KVM 124-comparison UI cohort**.
 
-The v2.1.4 checks matched 2,160 compiled resource values across four APKs. Those
-checks established resource inclusion and value equality; they did not execute
-the internal screen or prove which context resolved its displayed strings.
-See the [v2.1.5 localization fix report](docs/wireguard-i18n-2.1.5.md) for exact
-artifact identity, regression evidence and the scope of the runtime harness.
+See the [v2.2.0 base update report](docs/wireguard-upstream-2.2.0.md) for the
+exact source, artifact identity, tested app versions and unverified scope.
+Compatibility metadata does not establish that every declared version was
+tested. Historical v2.1.5 standalone settings Activity checks used explicit
+backend stubs; they are separate from running patched YouTube/Music apps and
+are not new v2.2.0 acceptance results.
 
-**No Android target-app acceptance test has been executed for v2.1.5.** A
-standalone Android harness with backend collaborators stubbed is separate from
-running the patched YouTube/Music apps. Target-app text layout, language
-selection/restart, profile import, AndroidKeyStore, remote handshake, playback,
-DNS/leak behavior, network transitions and concurrent app/process use require
-further device testing. The maintainer's successful v2.1.1 device use remains a
-separate historical report.
+Actual target-app launch, text layout, language selection/restart, profile
+import, AndroidKeyStore, remote handshake, playback, DNS/leak behavior, network
+transitions and concurrent app/process use need recorded device acceptance.
+The maintainer's successful v2.1.1 device use remains a separate historical
+report.
 
 ## Supported scope and limitations
 
@@ -79,23 +88,24 @@ separate historical report.
   options remain unsupported.
 - Intercepted requests have no direct fallback on tunnel failure. Local proxy
   readiness does not prove a remote handshake or Internet access.
-- The previously reported import failure has not been reproduced on the
-  reporting user's device; localized diagnostics do not prove every such
-  failure is resolved.
+- The previously reported profile-import and system WireGuard coexistence
+  failures have not been reproduced on the reporting users' devices. This base
+  update does not claim to resolve those reports or change system VPN routing.
 
 ## Source and release files
 
-The [v2.1.5 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.1.5)
+The [v2.2.0 release](https://github.com/seo-rii/morphe-wireguard-patches/releases/tag/v2.2.0)
 contains:
 
-- `morphe-wireguard-youtube-music-preview-2.1.5.mpp` — unsigned source-built
-  bundle; SHA-256 `ec0dc5bce25f795fbcae9c4abfd9a8dc2798e800355f88eb04f308f986998627`.
+- `morphe-wireguard-youtube-music-preview-2.2.0.mpp` — unsigned source-built
+  bundle; SHA-256 `d10f3f8b2cc114a6d11e1e80d02b0fc435199839b7051b6a1768a481c3095bd3`.
 - `morphe-wireguard-prototype-source.zip` — full corresponding modified source,
   pinned dependency source snapshots, build instructions and license notices.
 - `RELEASE-SHA256SUMS.txt` — asset checksums.
 
 The review patch is [wireguard-prototype.patch](wireguard-prototype.patch),
-against Morphe v2.1.0. Full source commit: `ac1a922bd896160c896764d7535698295fed487a` on `feat/wireguard-i18n-custom`.
+against Morphe v2.2.0. Full source commit: `d03b7439f517eeed13d12edc1f922ee0e640cd13` on
+`feat/wireguard-i18n-custom`.
 See [source build instructions](docs/wireguard-source-build.md), the source
 ZIP's `README-WIREGUARD.md`, `docs/`, `build-support/` and `scripts/`, and the
 [archive packaging helper](scripts/package-wireguard-source.py).
@@ -105,7 +115,7 @@ The historical v2.1.2 `repair` operation is not part of this source build.
 
 This is a modified, unofficial derivative of
 [MorpheApp/morphe-patches](https://github.com/MorpheApp/morphe-patches)
-at `8fa2c7a1a832498de8f179748998a3ca87e198eb`.
+at `44031c561ea048c8f196877f30a49c13bfd6afb6` (v2.2.0).
 Original [GPL-3.0 LICENSE](LICENSE), [NOTICE](NOTICE), dependency licenses and
 copyright notices are preserved. The app exposes bundled notices in WireGuard
 settings. No proprietary target APKs, personal profiles, private keys, account

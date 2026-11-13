@@ -11,12 +11,12 @@ import subprocess
 import tempfile
 import zipfile
 
-BASE = '8fa2c7a1a832498de8f179748998a3ca87e198eb'
-VERSION = '2.1.5'
-DATE = (2026, 11, 9, 0, 0, 0)
+BASE = '44031c561ea048c8f196877f30a49c13bfd6afb6'
+VERSION = '2.2.0'
+DATE = (2026, 11, 13, 0, 0, 0)
 PINS = {
     'morphe-patches-gradle-plugin': '5b7e4619931a8c78b7858e598e002222d37021b9',
-    'morphe-patches-library': '11f8c7e4d9dd64e18b0594d2c7cbf09176a65327',
+    'morphe-patches-library': '538d9a6574cbacb4ca66d8b687c44d93b2d8d470',
     'morphe-patcher': 'd19545e8505e0329cc640723cb8ff91eddd3cd05',
     'ARSCLib': '675bed2de397097400ba6f0c808e28005ae5aa53',
 }
@@ -140,8 +140,8 @@ def package(args):
     rows = copy_git(args.source, args.stage / 'morphe-wireguard')
     for name in ('LICENSE', 'NOTICE'):
         assert git(args.source, 'show', BASE + ':' + name) == (args.source / name).read_bytes(), name
-    assert b'version = 2.1.5' in (args.source / 'gradle.properties').read_bytes()
-    assert (args.stage / 'morphe-wireguard/docs/wireguard-i18n-2.1.5.md').is_file(), 'Missing final validation report'
+    assert ('version = ' + VERSION).encode() in (args.source / 'gradle.properties').read_bytes()
+    assert (args.stage / 'morphe-wireguard/docs/wireguard-upstream-2.2.0.md').is_file(), 'Missing final validation report'
     native = {}
     with zipfile.ZipFile(args.bundle) as z:
         assert z.testzip() is None
